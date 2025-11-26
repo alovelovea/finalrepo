@@ -87,7 +87,7 @@ python manage.py runserver
 
 ---
 
-## 🔑 7. 관리자(Admin) 계정 생성 (선택) id, pw 설정 후 사용. 데이터베이스 보기 좋음
+## (선택)🔑 7. 관리자(Admin) 계정 생성 id, pw 설정 후 사용. 데이터베이스 보기 좋음
 <img width="2559" height="1205" alt="image" src="https://github.com/user-attachments/assets/8842430f-c928-4b95-b201-1e0a14f24a79" />
 
 ```bash
