@@ -301,37 +301,40 @@ def add_recipe(request):
         ingredients = json.loads(request.POST.get("ingredients", "[]"))
         image_file = request.FILES.get("image")
 
+        # 1) 레시피 생성
         recipe = Recipe.objects.create(
             recipe_name=name,
             description=description,
             recipe_category=category
         )
 
-        # -------------------------
-        # 업로드 이미지 처리
-        # -------------------------
+        # 2) 이미지 저장
         if image_file:
-            # media/recipes 에 저장
             save_path = default_storage.save(f"recipes/{image_file.name}", image_file)
-            # DB 에는 '/media/recipes/파일명' 형태로 저장
             recipe.recipe_img = settings.MEDIA_URL + save_path
             recipe.save()
 
-        # -------------------------
-        # 재료 저장
-        # -------------------------
-        for ing_name in ingredients:
-            ingredient = Ingredient.objects.get(ingredient_name=ing_name)
+        # 3) 재료 저장 (🔥 수량 포함)
+        for ing in ingredients:
+            ing_id = ing.get("id")
+            quantity = ing.get("quantity", 1)
+
+            ingredient = Ingredient.objects.get(pk=ing_id)
+
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=ingredient,
-                r_quantity=1
+                r_quantity=quantity
             )
 
-        return JsonResponse({"message": "레시피 저장 완료!", "recipe_id": recipe.recipe_id}, status=201)
+        return JsonResponse(
+            {"message": "레시피 저장 완료!", "recipe_id": recipe.recipe_id},
+            status=201
+        )
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
 
 # 재료 목록 제공 API 
 @api_view(['GET'])

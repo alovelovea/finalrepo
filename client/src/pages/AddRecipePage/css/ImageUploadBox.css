@@ -38,15 +38,25 @@
   border-radius: 12px;      /* 박스 라운드 유지 */
 }
 
+.upload-preview-auto {
+  width: 100%;
+  max-height: 400px;    /* 세로 과하게 길어지지 않게 */
+  height: auto;
+  object-fit: contain;  /* 사진 비율 유지 */
+  border-radius: 12px;
+}
+
 .upload-box.dynamic {
   height: auto;               /* ✔ 높이 자동 */
   padding: 16px;              /* 빈 공간 조금 */
 }
 
-/* 이미지 비율 유지하면서 원본 그대로 표시 */
-.upload-preview-auto {
+.upload-container {
   width: 100%;
-  height: auto;               /* ✔ 비율 유지 핵심 */
-  border-radius: 12px;
   display: block;
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
