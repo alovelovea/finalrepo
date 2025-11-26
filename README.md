@@ -11,7 +11,7 @@
 
 ```bash
 git clone https://github.com/alovelovea/finalrepo.git
-cd finalreopo
+cd .\finalrepo\
 ```
 
 ---
