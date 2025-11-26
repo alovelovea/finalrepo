@@ -1,0 +1,56 @@
+.login-wrap {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  padding: 28px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  max-width: 1100px;
+  margin: 48px auto;
+  
+  /* ✅ 핵심 수정 */
+  align-items: center; /* 수직 중앙 정렬 */
+}
+
+/* 로그인 박스 */
+.auth-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* ✅ 로그인 카드 내용도 가운데 */
+  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+/* 회원가입 링크 */
+.signup-link {
+  text-align: right;
+  margin-top: 8px;
+}
+
+.signup-link a {
+  color: #333;
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* 반응형 */
+@media (max-width: 920px) {
+  .login-wrap {
+    grid-template-columns: 1fr;
+    min-height: 560px;
+  }
+
+  .auth-col {
+    order: 2;
+  }
+
+  .commercial {
+    order: 1;
+  }
+  
+}

@@ -1,0 +1,64 @@
+# =============================
+# 🐍 Python / Django 기본
+# =============================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 가상환경 (Windows/Linux/Mac)
+venv/
+env/
+myenv/
+.venv/
+.env/
+
+# Django 관련
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+static/
+staticfiles/
+local_settings.py
+
+# Migrations 캐시
+*/migrations/__pycache__/
+*/migrations/*.pyc
+
+# =============================
+# 🧪 테스트 / 커버리지 / 빌드
+# =============================
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+build/
+dist/
+*.egg-info/
+*.spec
+
+# =============================
+# 💻 IDE / 편집기 설정
+# =============================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =============================
+# 🧰 OS 자동 생성 파일
+# =============================
+.DS_Store
+Thumbs.db
+
+# =============================
+# ⚙️ 프로젝트별 기타
+# =============================
+NUL

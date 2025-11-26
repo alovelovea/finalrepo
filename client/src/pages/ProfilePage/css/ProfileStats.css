@@ -1,0 +1,35 @@
+.stats-container {
+  margin-top: 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.stats-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.stats-number {
+  font-size: 26px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.stats-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.stats-icon {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 6px;
+}

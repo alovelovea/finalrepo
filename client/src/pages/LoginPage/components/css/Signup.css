@@ -1,0 +1,130 @@
+/* 🧩 회원가입 카드 전체 */
+.signup-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 본문 영역 */
+.signup-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+/* 버튼 영역 */
+.signup-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 버튼을 카드 기준 가운데로 */
+}
+
+/* 버튼 스타일 */
+.signup-btn {
+  width: 40%;               /* ✅ 크기 줄이기 */
+  min-width: 120px;
+  padding: 8px 0;
+  border: none;
+  border-radius: 8px;
+  background: #5aa064;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13.5px;
+
+  /* ✅ 가운데보다 약간 오른쪽으로 */
+  transform: translateX(4%);
+}
+
+.signup-btn:hover {
+  filter: brightness(0.95);
+}
+
+/* 하단 “이미 계정이 있으신가요?” */
+.signup-bottom {
+  margin-top: 6px;
+  width: 100%;
+  text-align: right;
+  font-size: 12.5px;
+  color: #374151;
+}
+
+.signup-bottom a {
+  color: #000;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.signup-bottom a:hover {
+  text-decoration: underline;
+}
+
+/* 제목 */
+.signup-title {
+  margin: 0 0 6px;
+  font-weight: 800;
+  font-size: 17px;
+}
+
+/* 라벨 (입력 제목) */
+.signup-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  color: #374151;
+  font-size: 13px;
+}
+
+/* 입력창 스타일 */
+.signup-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  outline: none;
+  font-size: 13px;
+}
+
+.signup-input:focus {
+  border-color: #95c49c;
+  box-shadow: 0 0 0 2px rgba(149,196,156,0.2);
+}
+
+/* 필드셋, 라디오/체크박스 */
+.signup-fieldset {
+  margin-top: 6px;
+}
+
+.signup-legend {
+  font-weight: 700;
+  margin-bottom: 2px;
+  font-size: 13px;
+}
+
+.signup-checkboxes,
+.signup-radios {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 8px;
+  color: #374151;
+  font-size: 13px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .signup-btn {
+    width: 60%;
+    transform: none; /* 모바일에서는 가운데 정렬 */
+  }
+
+  .signup-bottom {
+    text-align: center;
+    margin-top: 10px;
+  }
+}

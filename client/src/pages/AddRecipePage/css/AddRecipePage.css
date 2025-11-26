@@ -1,0 +1,166 @@
+/* AddRecipePage.css */
+
+/* 상단 navbar와 겹치지 않게 여백 */
+.add-page-wrapper {
+  width: 100%;
+  padding-top: 120px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 150px;
+  background-color: var(--color-bg);
+  display: flex;
+  justify-content: center;
+}
+
+/* 중앙 카드 */
+.add-recipe-card {
+  width: 100%;
+  max-width: 850px;
+  background-color: #fff;
+  padding: 32px 36px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 120px;
+
+   overflow: visible;
+}
+
+/* 제목 */
+.add-recipe-header {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;             /* label과 input 사이 간격 */
+  margin-bottom: 20px;   /* 섹션 간 간격 */
+  
+}
+
+.form-row-block {
+  width: 100%;
+  display: block;  
+  margin-bottom: 20px; /* 여백 추가 추천 */
+}
+
+
+
+/* 라벨 */
+.input-label {
+   min-width: 120px;      /* 너비 고정 → 정렬 깔끔 */
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;     /* 글자 중앙정렬 */
+  white-space: nowrap;
+  display: inline-block;
+  min-width: 120px;
+}
+
+/* 입력창 */
+.input-box {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #000 !important; /* ✔ 기본 테두리 검정색 */
+  border-radius: 8px;
+  background-color: #fff !important;
+  font-size: 14px;
+}
+
+.input-box:focus {
+  border-color: var(--color-primary);
+}
+
+
+/* textarea */
+.textarea-box {
+  width: 100%;
+  min-height: 180px;        
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;      
+  background-color: #f7f7f7; 
+  font-size: 14px;
+  resize: none;
+  margin-bottom: 24px;
+}
+
+.textarea-box:focus {
+  border-color: var(--color-primary);
+  background-color: #ffffff;   
+}
+/* 구성재료 */
+
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.category-group {
+  margin-bottom: 16px;
+}
+
+.category-list {
+  display: flex;
+  gap: 16px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+
+/* 버튼 */
+.btn-area {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  width: 100%;
+  align-items: center;
+}
+
+/* 가운데 버튼 영역 */
+.btn-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* 취소 버튼 오른쪽 정렬 */
+.btn-right {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 80px; /* 버튼이 왼쪽으로 붙지 않도록 */
+}
+
+.btn-cancel {
+  padding: 10px 18px;
+  background-color: var(--color-graybtn);
+  color: var(--color-text);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.btn-submit {
+  padding: 10px 18px;
+  background-color: #4CAF50 !important; /* 초록색 강제 적용 */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+   justify-content: center;
+}
