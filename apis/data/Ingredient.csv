@@ -45,3 +45,9 @@ ingredient_name,ingredient_img,unit,ingredient_category,price,shelf_life
 김치볶음밥(냉동),kimchi_fried_rice_frozen.jpg,개,냉동식품,3000,40
 냉동만두,dumpling_frozen.jpg,g,냉동식품,5000,30
 팝콘치킨,popcorn_chicken.jpg,g,냉동식품,5500,30
+파스타면,pasta_noodle.jpg,g,신선식품,1000,10
+면사리,chinese_noodle.jpg,g,신선식품,2000,10
+간장,soy_sauce.jpg,g,신선식품,2000,14
+차슈,charsiu.jpg,g,냉동,3000,20
+설탕,sugar.png,g,신선식품,5000,60
+올리브오일,olive_oil.jpg,g,신선식품,3000,60
