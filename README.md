@@ -10,7 +10,8 @@
 ## 🚀 1. 프로젝트 클론
 
 ```bash
-
+git clone https://github.com/alovelovea/finalrepo.git
+cd finalreop
 ```
 
 ---
