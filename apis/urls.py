@@ -15,6 +15,7 @@ from .views import (
     delete_ingredient,
     create_shopping_records_api,
     recipe_detail_api,
+    shopping_ingredient_api,
 )
 
 urlpatterns = [
@@ -27,11 +28,13 @@ urlpatterns = [
     path('classify/', classify_query_view, name='classify_query'),
     
     # 재료 추가 식재료 조회 (+쇼핑)
-    path('fridge_items/', fridge_items_api, name='fridge_items_api'),
-    #쇼핑 
-    path('shopping/', create_shopping_records_api, name='create_shopping_records_api'),
-    # 쇼핑 식재료 목록 API (수기추가)
+    path('api/fridge_items/', fridge_items_api, name='fridge_items_api'),
+     # 식재료 목록 API (수기추가)
     path("ingredients/list/", ingredient_list_view, name='ingredient_list_view'),
+    #쇼핑 shopping page
+    path('api/shopping/', create_shopping_records_api, name='create_shopping_records_api'),
+     # 쇼핑에서 식재료 보여주기 API 첫번째 push에서 추가(민재) shopping page
+    path('api/shoppingingredient/', shopping_ingredient_api, name='shopping_ingredient_api'),
     #재료저장 (LLM 추가)
     path('api/fridge/save/', save_fridge_items, name='save_fridge_items'),
 
