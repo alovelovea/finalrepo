@@ -105,25 +105,26 @@ def fridge_items_api(request):
         return JsonResponse({"error": "존재하지 않는 사용자입니다."}, status=404)
 
 # 쇼핑 식재료 목록 API (수기추가)
-@csrf_exempt
-def ingredient_list_view(request):
-    data = list(
-        Ingredient.objects.values(
-            "ingredient_id",
-            "ingredient_name",
-            "ingredient_img",
-            "unit"
-        )
+@api_view(['GET'])
+def shopping_ingredient_api(request):
+    ingredients = Ingredient.objects.values(
+        "ingredient_id",
+        "ingredient_name",
+        "ingredient_img",
+        "price",
     )
 
-    # React public/INGREDIENT 기준 URL 생성
-    for item in data:
-        img = item.get("ingredient_img")
-        if img:
-            item["ingredient_img"] = f"/INGREDIENT/{img}"
+    data = [
+        {
+            "ingredient_id": ing["ingredient_id"],
+            "name": ing["ingredient_name"],
+            "price": float(ing["price"]),
+            "img": ing["ingredient_img"],  # ex: 'gochujang.jpg'
+        }
+        for ing in ingredients
+    ]
 
-    return JsonResponse(data, safe=False)
-
+    return JsonResponse({"ingredients": data}, safe=False)
 
 
 
@@ -497,4 +498,23 @@ def recipe_detail_api(request, recipe_id):
     except Recipe.DoesNotExist:
         return JsonResponse({"error": "레시피를 찾을 수 없습니다."}, status=404)
 
+# 쇼핑 식재료 목록 API (수기추가)
+@csrf_exempt
+def ingredient_list_view(request):
+    data = list(
+        Ingredient.objects.values(
+            "ingredient_id",
+            "ingredient_name",
+            "ingredient_img",
+            "unit"
+        )
+    )
+
+    # React public/INGREDIENT 기준 URL 생성
+    for item in data:
+        img = item.get("ingredient_img")
+        if img:
+            item["ingredient_img"] = f"/INGREDIENT/{img}"
+
+    return JsonResponse(data, safe=False)
 

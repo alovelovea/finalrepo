@@ -13,25 +13,26 @@ const ShoppingPage = () => {
   const [query, setQuery] = useState('');
   const [cart, setCart] = useState([]); // {id, productId, qty}
 
-  // 백엔드로부터 재료 목록을 가져오는 useEffect
-  useEffect(() => {
-    const fetchIngredients = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/api/ingredients/');
-        // 🔹 img: 장고에서 파일명만 내려준다고 가정하고, 여기서 prefix 붙임
-        const mappedProducts = response.data.ingredients.map((ing) => ({
-          id: ing.ingredient_id,
-          name: ing.name,
-          price: ing.price,
-          image: `INGREDIENT/${ing.img}`, // ✅ public/INGREDIENT/img/ 안의 파일 경로
-        }));
-        setProducts(mappedProducts);
-      } catch (error) {
-        console.error('재료 목록을 가져오는데 실패했습니다.', error);
-      }
-    };
-    fetchIngredients();
-  }, []);
+ useEffect(() => {
+  const fetchIngredients = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/shoppingingredient/');
+
+      const mappedProducts = response.data.ingredients.map((ing) => ({
+        id: ing.ingredient_id,
+        name: ing.name,
+        price: ing.price,
+        image: `/INGREDIENT/${ing.img}`,   // ⭐ public/INGREDIENT 안에서 찾음
+      }));
+
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error('재료 목록을 가져오는데 실패했습니다.', error);
+    }
+  };
+
+  fetchIngredients();
+}, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -90,7 +91,7 @@ const ShoppingPage = () => {
 
     try {
       const response = await axios.post('http://localhost:8000/api/shopping/', {
-        user_id: 'minjae01', // 고정 사용자 ID
+        user_id:  localStorage.user_id, 
         items: purchaseData,
       });
 
