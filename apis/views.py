@@ -82,7 +82,8 @@ def signup_user(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
     
-# 재료 추가 식재료 조회
+
+# ingredientPage: fridge_id가 맞는 재료만 보내주기 API
 @api_view(['GET'])
 @csrf_exempt
 def fridge_items_api(request):
@@ -96,37 +97,39 @@ def fridge_items_api(request):
                 "fridge_id": item.fridge_id,
                 "ingredient": item.ingredient.ingredient_name,
                 "quantity": float(item.f_quantity),
-                "category": item.ingredient.ingredient_category,
                 "unit": item.ingredient.unit,
-                "expiry_date": item.expiry_date.strftime("%Y-%m-%d")
+                "category": item.ingredient.ingredient_category,
+                "expiry_date": item.expiry_date.strftime("%Y-%m-%d") if item.expiry_date else None,
             }
             for item in fridge_items
         ]
         return JsonResponse({"items": data}, status=200)
+
     except Person.DoesNotExist:
         return JsonResponse({"error": "존재하지 않는 사용자입니다."}, status=404)
 
+
+
 # 쇼핑 식재료 목록 API (수기추가)
-@api_view(['GET'])
-def shopping_ingredient_api(request):
-    ingredients = Ingredient.objects.values(
-        "ingredient_id",
-        "ingredient_name",
-        "ingredient_img",
-        "price",
+@csrf_exempt
+def ingredient_list_view(request):
+    data = list(
+        Ingredient.objects.values(
+            "ingredient_id",
+            "ingredient_name",
+            "ingredient_img",
+            "unit"
+        )
     )
 
-    data = [
-        {
-            "ingredient_id": ing["ingredient_id"],
-            "name": ing["ingredient_name"],
-            "price": float(ing["price"]),
-            "img": ing["ingredient_img"],  # ex: 'gochujang.jpg'
-        }
-        for ing in ingredients
-    ]
+    # React public/INGREDIENT 기준 URL 생성
+    for item in data:
+        img = item.get("ingredient_img")
+        if img:
+            item["ingredient_img"] = f"/INGREDIENT/{img}"
 
-    return JsonResponse({"ingredients": data}, safe=False)
+    return JsonResponse(data, safe=False)
+
 
 
 
@@ -265,9 +268,7 @@ def recommend_recipes_by_expiry(request):
 
     return JsonResponse({"recipes": results}, status=200)
 
-# ============================
 # 레시피 리스트 API
-# ============================
 @api_view(['GET'])
 def recipe_list_api(request):
     user_id = request.GET.get("user_id")
@@ -278,66 +279,72 @@ def recipe_list_api(request):
 
     data = []
     for r in recipes:
-        img = r.recipe_img          # DB에는 파일명만 저장
+        ing_list = RecipeIngredient.objects.filter(recipe=r)
+        ingredients = [
+            f"{ri.ingredient.ingredient_name} {float(ri.r_quantity)}{ri.ingredient.unit}"
+            for ri in ing_list
+        ]
+
         data.append({
             "id": r.recipe_id,
             "name": r.recipe_name,
             "category": r.recipe_category,
-            "image": img,           # React에서 경로 조립
+            "image": r.recipe_img,
+            "ingredients": ", ".join(ingredients),
             "favorite": r.recipe_id in liked_ids
         })
 
     return JsonResponse({"recipes": data})
 
 
-
-# ===========================
-# 🔥 2) 레시피 저장 API
-# ===========================
+# 레시피 저장 API
 @api_view(['POST'])
 @csrf_exempt
 def add_recipe(request):
     try:
+        # --- 기본 정보 ---
         name = request.POST.get("name")
         description = request.POST.get("description")
         category = request.POST.get("category")
         ingredients = json.loads(request.POST.get("ingredients", "[]"))
         image_file = request.FILES.get("image")
 
-        # 1) 레시피 생성
+        # -------------------------
+        # 1) Recipe 생성
+        # -------------------------
         recipe = Recipe.objects.create(
             recipe_name=name,
             description=description,
             recipe_category=category
         )
 
-        # 2) 이미지 저장
+        # -------------------------
+        # 2) 이미지 파일 저장
+        # -------------------------
         if image_file:
             save_path = default_storage.save(f"recipes/{image_file.name}", image_file)
             recipe.recipe_img = settings.MEDIA_URL + save_path
             recipe.save()
 
-        # 3) 재료 저장 (🔥 수량 포함)
-        for ing in ingredients:
-            ing_id = ing.get("id")
-            quantity = ing.get("quantity", 1)
-
-            ingredient = Ingredient.objects.get(pk=ing_id)
+        # -------------------------
+        # 3) RecipeIngredient 생성
+        #    재료 이름만 넘어온다고 가정.
+        #    수량은 기본 1로 저장.
+        # -------------------------
+        for ing_name in ingredients:
+            ingredient = Ingredient.objects.get(ingredient_name=ing_name)
 
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=ingredient,
-                r_quantity=quantity
+                r_quantity=1  # 기본 1개로 저장
             )
 
-        return JsonResponse(
-            {"message": "레시피 저장 완료!", "recipe_id": recipe.recipe_id},
-            status=201
-        )
+        return JsonResponse({"message": "레시피 저장 완료", "recipe_id": recipe.recipe_id}, status=201)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
+    
 
 # 재료 목록 제공 API 
 @api_view(['GET'])
@@ -362,35 +369,20 @@ def ingredient_list_api(request):
         return JsonResponse({"error": str(e)}, status=400)
 
 
+# 좋아요 표시
 def toggle_like(request, recipe_id):
-    # 1) 프론트에서 user_id를 GET/POST로 전달한다고 가정
-    user_id = request.GET.get("user_id") or request.POST.get("user_id")
-    if not user_id:
-        return JsonResponse({"error": "user_id가 필요합니다."}, status=400)
-
-    # 2) 실제 사용자 조회
-    person = get_object_or_404(Person, user_id=user_id)
-
-    # 3) 레시피 조회
+    person = Person.objects.get(user_id='minjae01')
     recipe = get_object_or_404(Recipe, pk=recipe_id)
 
-    # 4) 좋아요 상태 토글
     existing = Like.objects.filter(person=person, recipe=recipe)
     if existing.exists():
         existing.delete()
-        liked = False
     else:
         Like.objects.create(person=person, recipe=recipe)
-        liked = True
 
-    # 5) 프론트가 바로 반영하기 좋게 JSON 반환
-    return JsonResponse({
-        "recipe_id": recipe_id,
-        "liked": liked
-    })
+    return redirect("my_fridge")
 
-
-#ingredientPage 수량 조절
+#Fridge 수량 조절
 @api_view(['PUT'])
 @csrf_exempt
 def update_fridge_item(request, fridge_id):
@@ -423,7 +415,7 @@ def update_fridge_item(request, fridge_id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
     
-#ingredientPage 재료 삭제
+#Fridge 재료 삭제
 @api_view(['DELETE'])
 @csrf_exempt
 def delete_ingredient(request, fridge_id):
@@ -470,53 +462,4 @@ def create_shopping_records_api(request):
         return JsonResponse({"error": "장바구니에 유효하지 않은 재료가 포함되어 있습니다."}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
-
-# ============================
-# 🔥 레시피 상세 조회 API (추가)
-# ============================
-@api_view(['GET'])
-def recipe_detail_api(request, recipe_id):
-    try:
-        recipe = Recipe.objects.get(recipe_id=recipe_id)
-
-        ing_list = RecipeIngredient.objects.filter(recipe=recipe)
-        ingredients_list = [
-            f"{ri.ingredient.ingredient_name} {float(ri.r_quantity)}{ri.ingredient.unit}"
-            for ri in ing_list
-        ]
-
-        data = {
-            "id": recipe.recipe_id,
-            "name": recipe.recipe_name,
-            "image": recipe.recipe_img,   # 그대로 전달
-            "category": recipe.recipe_category,
-            "description": recipe.description or "",
-            "ingredients_list": ingredients_list,
-        }
-
-        return JsonResponse(data)
-
-    except Recipe.DoesNotExist:
-        return JsonResponse({"error": "레시피를 찾을 수 없습니다."}, status=404)
-
-# 쇼핑 식재료 목록 API (수기추가)
-@csrf_exempt
-def ingredient_list_view(request):
-    data = list(
-        Ingredient.objects.values(
-            "ingredient_id",
-            "ingredient_name",
-            "ingredient_img",
-            "unit"
-        )
-    )
-
-    # React public/INGREDIENT 기준 URL 생성
-    for item in data:
-        img = item.get("ingredient_img")
-        if img:
-            item["ingredient_img"] = f"/INGREDIENT/{img}"
-
-    return JsonResponse(data, safe=False)
 

@@ -11,12 +11,12 @@ from django.utils.dateparse import parse_date
 from rest_framework.decorators import api_view
 import re
 
-# key는 공백
+# ✅ API Key 직접 하드코딩
 llm_consistent = None
 try:
     llm_consistent = ChatOpenAI(
         model='gpt-4o',
-        api_key="",
+        api_key=key,
         temperature=0,
         max_tokens=1000,
         top_p=0.3,

@@ -14,8 +14,6 @@ from .views import (
     update_fridge_item,
     delete_ingredient,
     create_shopping_records_api,
-    recipe_detail_api,
-    shopping_ingredient_api,
 )
 
 urlpatterns = [
@@ -27,14 +25,12 @@ urlpatterns = [
     # GPT LLM 분석 호출
     path('classify/', classify_query_view, name='classify_query'),
     
-    # 재료 추가 식재료 조회 (+쇼핑)
+    # ingredientPage: fridge_id가 맞는 재료만 보내주기 API
     path('fridge_items/', fridge_items_api, name='fridge_items_api'),
-     # 식재료 목록 API (수기추가)
+    #쇼핑 
+    path('shopping/', create_shopping_records_api, name='create_shopping_records_api'),
+    # 쇼핑 식재료 목록 API (수기추가)
     path("ingredients/list/", ingredient_list_view, name='ingredient_list_view'),
-    #쇼핑 shopping page
-    path('api/shopping/', create_shopping_records_api, name='create_shopping_records_api'),
-     # 쇼핑에서 식재료 보여주기 API 첫번째 push에서 추가(민재) shopping page
-    path('api/shoppingingredient/', shopping_ingredient_api, name='shopping_ingredient_api'),
     #재료저장 (LLM 추가)
     path('api/fridge/save/', save_fridge_items, name='save_fridge_items'),
 
@@ -42,8 +38,7 @@ urlpatterns = [
     path('api/recipes/', recipe_list_api, name='recipe_list_api'),
     #레시피 저장 API
     path('api/add_recipe/', add_recipe, name='add_recipe'),
-    #레시피 상세정보
-    path('api/recipes/<int:recipe_id>/', recipe_detail_api, name='recipe_detail_api'),
+    
     #재료 목록 제공 API 
     path('api/ingredients/', ingredient_list_api, name='ingredient_list_api'),
     
@@ -56,8 +51,9 @@ urlpatterns = [
     #   .then(res => res.json())
     #   .then(data => console.log(data.recipes));
 
-    #ingredientPage 수량 조절
+    #Fridge 수량 조절  ←🔥 우리가 추가한 URL
     path('api/fridge_items/<int:fridge_id>/', update_fridge_item, name='update_fridge_item'),
-    #ingredientPage 재료 삭제
+
+    #Fridge 재료 삭제  ←🔥 우리가 추가한 URL
     path('api/delete_ingredient/<int:fridge_id>/', delete_ingredient, name='delete_ingredient'),
 ]

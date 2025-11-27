@@ -1,60 +1,77 @@
-import os
-import sys
-import django
+# apis/scripts/load_shopping_data.py
+from django.conf import settings
+from django.db import transaction
+from pathlib import Path
+from apis.models import Shopping, Person, Ingredient
 import csv
 from datetime import datetime
-from decimal import Decimal
 
-# Django 프로젝트 루트 등록
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+def _to_float(s):
+    try:
+        return float(str(s).strip())
+    except Exception:
+        return 0.0
 
-# Django 환경 설정
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_fridge.settings')
-django.setup()
-
-# 모델 불러오기
-from apis.models import Shopping, Person, Ingredient
-
-CSV_PATH = 'apis/data/Shopping.csv'
-
-print("🧹 Shopping 데이터 전체 삭제 중...")
-Shopping.objects.all().delete()
-print("✅ Shopping 기존 데이터 삭제 완료!")
-
-with open(CSV_PATH, encoding='utf-8-sig') as file:
-    reader = csv.DictReader(file)
-    count = 0
-
-    for row in reader:
-
-        user_id = row['user_id'].strip()
-        ingredient_name = row['ingredient_name'].strip()
-
-        # 🔥 quantity 안전 파싱
-        quantity_raw = row['quantity'].strip().split()[0]
-        quantity = Decimal(quantity_raw)
-
-        # 🔥 purchased_date 안전 파싱
-        date_raw = row['purchased_date'].strip().split()[0]
-        purchased_date = datetime.strptime(date_raw, "%Y-%m-%d").date()
-
+def _to_date(s):
+    s = str(s).strip()
+    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y.%m.%d"):
         try:
-            person = Person.objects.get(user_id=user_id)
-            ingredient = Ingredient.objects.get(ingredient_name=ingredient_name)
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            pass
+    raise ValueError(f"날짜 파싱 실패: {s}")
 
-            shopping = Shopping.objects.create(
+def run():
+    csv_path = Path(settings.BASE_DIR) / "apis" / "data" / "Shopping.csv"
+
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV not found: {csv_path}")
+
+    print("🧹 기존 Shopping 데이터 삭제 중...")
+    Shopping.objects.all().delete()
+    print("✅ 기존 데이터 삭제 완료!")
+
+    inserted = skipped = 0
+
+    with csv_path.open(encoding="cp949", newline="") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    with transaction.atomic():
+        for row in rows:
+            user_id = (row.get("user_id") or "").strip()
+            iname = (row.get("ingredient") or "").strip()
+            qty = _to_float(row.get("quantity"))
+            try:
+                purchased_date = _to_date(row.get("purchased_date"))
+            except Exception as e:
+                print(f"⚠️ 날짜 파싱 실패: {row} | {e}")
+                skipped += 1
+                continue
+
+            # 사용자 찾기
+            try:
+                person = Person.objects.get(user_id=user_id)
+            except Person.DoesNotExist:
+                print(f"⚠️ 사용자 없음: {user_id}")
+                skipped += 1
+                continue
+
+            # 재료 찾기
+            try:
+                ingredient = Ingredient.objects.get(ingredient_name=iname)
+            except Ingredient.DoesNotExist:
+                print(f"⚠️ 재료 없음: {iname}")
+                skipped += 1
+                continue
+
+            # Shopping 생성 → save()에서 가격 계산 및 Fridge 자동 생성됨
+            Shopping.objects.create(
                 person=person,
                 ingredient=ingredient,
-                quantity=quantity,
+                quantity=qty,
                 purchased_date=purchased_date
             )
+            inserted += 1
 
-            count += 1
-            print(f"🛒 쇼핑 추가됨 → {user_id} / {ingredient_name} / {quantity}개 / {purchased_date}")
-
-        except Person.DoesNotExist:
-            print(f"⚠ 사용자 '{user_id}' 없음")
-        except Ingredient.DoesNotExist:
-            print(f"⚠ 재료 '{ingredient_name}' 없음")
-
-print(f"\n🎯 총 {count}개의 쇼핑 데이터 삽입 완료!")
+    print(f"🎉 Shopping {inserted}건 삽입 완료! (스킵 {skipped}건)")

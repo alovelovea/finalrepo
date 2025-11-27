@@ -1,25 +1,26 @@
-import os
-import sys
-import django
+# apis/scripts/load_allergy_data.py
+from django.conf import settings
+from django.db import transaction
+from apis.models import Allergy
+from pathlib import Path
 import csv
 
-# ✅ 프로젝트 루트 경로 추가 (중요!)
-# → C:\Users\alswo\Desktop\newproject 를 Python import 경로에 등록
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+def run():
+    csv_path = Path(settings.BASE_DIR) / "apis" / "data" / "Allergy.csv"
 
-# ✅ Django 환경 설정
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_fridge.settings')
-django.setup()
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV not found: {csv_path}")
 
-# ✅ 모델 불러오기
-from apis.models import Allergy
-Allergy.objects.all().delete()
-# ✅ CSV 파일 읽어서 삽입
-with open('apis/data/Allergy.csv', encoding='utf-8') as file:
-    reader = csv.DictReader(file)
-    for row in reader:
-        Allergy.objects.create(
-            allergy_name=row['allergy_name']
-        )
+    Allergy.objects.all().delete()
 
-print("✅ Allergy 데이터 삽입 완료!")
+    rows = []
+    with csv_path.open(encoding="cp949", newline="") as f:
+
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append(Allergy(allergy_name=row["allergy_name"]))
+
+    with transaction.atomic():
+        Allergy.objects.bulk_create(rows, batch_size=1000)
+
+    print("✅ Allergy 데이터 삽입 완료!")

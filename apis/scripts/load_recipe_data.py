@@ -1,31 +1,32 @@
-import os
-import sys
-import django
-import csv
-
-# ✅ Django 프로젝트 루트 경로 등록
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-# ✅ Django 환경 설정
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_fridge.settings')
-django.setup()
-
-# ✅ 모델 불러오기
+# apis/scripts/load_recipe_data.py
+from django.conf import settings
+from django.db import transaction
 from apis.models import Recipe
+from pathlib import Path
+import csv, os
 
-Recipe.objects.all().delete()
-# ✅ 파일 경로 설정
-CSV_PATH = 'apis/data/Recipe.csv'
+def run():
+    csv_path = Path(settings.BASE_DIR) / "apis" / "data" / "Recipe.csv"
+    photo_base = "photo/FOOD/"  # DB 저장 상대경로
 
-Recipe.objects.all().delete()
-with open(CSV_PATH, encoding='utf-8') as file:
-    reader = csv.DictReader(file)
-    for row in reader:
-        Recipe.objects.create(
-            recipe_name=row['recipe_name'],
-            description=row['description'],
-            recipe_img=row['recipe_img'],
-            recipe_category=row['recipe_category']
-        )
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV not found: {csv_path}")
 
-print("✅ Recipe 데이터 삽입 완료!")
+    # 필요 시 초기화
+    # Recipe.objects.all().delete()
+
+    rows = []
+    with csv_path.open(encoding="cp949", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append(Recipe(
+                recipe_name=row["recipe_name"],
+                description=row.get("description", ""),
+                recipe_img=os.path.join(photo_base, row["recipe_img"]).replace("\\", "/"),
+                recipe_category=row.get("recipe_category", "기타"),
+            ))
+
+    with transaction.atomic():
+        Recipe.objects.bulk_create(rows, batch_size=1000)
+
+    print("✅ Recipe 데이터 삽입 완료!")

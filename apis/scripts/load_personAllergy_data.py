@@ -1,46 +1,48 @@
-import os
-import sys
-import django
+# apis/scripts/load_personAllergy_data.py
+from django.conf import settings
+from django.db import transaction
+from pathlib import Path
+from apis.models import Person, Allergy, PersonAllergy
 import csv
 
-# ✅ Django 프로젝트 루트 경로 등록
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+def run():
+    csv_path = Path(settings.BASE_DIR) / "apis" / "data" / "PersonAllergy.csv"
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV not found: {csv_path}")
 
-# ✅ Django 환경 설정
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_fridge.settings')
-django.setup()
+    print("🧹 기존 PersonAllergy 데이터 삭제 중...")
+    PersonAllergy.objects.all().delete()
+    print("✅ 기존 데이터 삭제 완료!")
 
-# ✅ 모델 불러오기
-from apis.models import Person, Allergy, PersonAllergy
+    inserted, skipped = 0, 0
+    with csv_path.open(encoding="cp949", newline="") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
 
-# ✅ CSV 파일 경로
-CSV_PATH = 'apis/data/PersonAllergy.csv'
+    with transaction.atomic():
+        for row in rows:
+            user_id = (row.get("user_id") or "").strip()
+            allergy_name = (row.get("allergy_name") or "").strip()
+            if not user_id or not allergy_name:
+                skipped += 1
+                continue
 
-# ✅ 기존 데이터 전체 삭제
-print("🧹 기존 PersonAllergy 데이터 삭제 중...")
-PersonAllergy.objects.all().delete()
-print("✅ 기존 데이터 삭제 완료!")
+            try:
+                person = Person.objects.get(user_id=user_id)
+            except Person.DoesNotExist:
+                print(f"⚠️ 사용자 없음: {user_id}")
+                skipped += 1
+                continue
 
-# ✅ CSV 읽어서 DB에 삽입
-with open(CSV_PATH, encoding='utf-8') as file:
-    reader = csv.DictReader(file)
-    count = 0
-    for row in reader:
-        try:
-            # 🔥 수정된 부분: user_id 컬럼으로 조회
-            person = Person.objects.get(user_id=row['user_id'])
-            allergy = Allergy.objects.get(allergy_name=row['allergy_name'])
-            
-            PersonAllergy.objects.create(
-                person=person,
-                allergy=allergy
-            )
-            count += 1
-        except Person.DoesNotExist:
-            print(f"⚠️ 사용자 '{row['user_id']}' 를 찾을 수 없습니다.")
-        except Allergy.DoesNotExist:
-            print(f"⚠️ 알러지 '{row['allergy_name']}' 를 찾을 수 없습니다.")
-        except Exception as e:
-            print(f"❌ 삽입 중 오류 발생: {e}")
+            try:
+                allergy = Allergy.objects.get(allergy_name=allergy_name)
+            except Allergy.DoesNotExist:
+                print(f"⚠️ 알러지 없음: {allergy_name}")
+                skipped += 1
+                continue
 
-print(f"✅ PersonAllergy 데이터 {count}개 삽입 완료!")
+            # 중복 방지 원하면 update_or_create로 교체 가능
+            PersonAllergy.objects.create(person=person, allergy=allergy)
+            inserted += 1
+
+    print(f"🎯 PersonAllergy 삽입 {inserted}건, 스킵 {skipped}건 완료!")
