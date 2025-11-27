@@ -28,7 +28,7 @@ urlpatterns = [
     path('classify/', classify_query_view, name='classify_query'),
     
     # 재료 추가 식재료 조회 (+쇼핑)
-    path('api/fridge_items/', fridge_items_api, name='fridge_items_api'),
+    path('fridge_items/', fridge_items_api, name='fridge_items_api'),
      # 식재료 목록 API (수기추가)
     path("ingredients/list/", ingredient_list_view, name='ingredient_list_view'),
     #쇼핑 shopping page

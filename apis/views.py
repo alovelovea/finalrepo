@@ -93,10 +93,12 @@ def fridge_items_api(request):
 
         data = [
             {
+                "fridge_id": item.fridge_id,
                 "ingredient": item.ingredient.ingredient_name,
                 "quantity": float(item.f_quantity),
-                "unit": item.ingredient.unit,          # ✅ 단위 추가!
-                "exdate": item.exdate.strftime("%Y-%m-%d")
+                "category": item.ingredient.ingredient_category,
+                "unit": item.ingredient.unit,
+                "expiry_date": item.expiry_date.strftime("%Y-%m-%d")
             }
             for item in fridge_items
         ]

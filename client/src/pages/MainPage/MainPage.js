@@ -15,13 +15,18 @@ const recommendedRecipeSample = [
 const MainPage = () => {
   const [selectedSection, setSelectedSection] = useState(null);
   const [fridgeItems, setFridgeItems] = useState([]); // 냉장고 재료 상태 추가
+  const currentUserId = localStorage.getItem("user_id") || null; // 로그인한 사용자 ID 가져오기
 
   // API에서 냉장고 재료 데이터를 가져오는 useEffect 훅
   useEffect(() => {
     const fetchFridgeItems = async () => {
+      if (!currentUserId) {
+        console.log("로그인한 사용자가 없어 재료를 가져오지 않습니다.");
+        setFridgeItems([]);
+        return;
+      }
       try {
-        // TODO: 로그인 기능 구현 후 user_id 동적으로 받아오기
-        const response = await axios.get('http://localhost:8000/api/fridge_items/?user_id=minjae01');
+        const response = await axios.get(`http://localhost:8000/fridge_items/?user_id=${currentUserId}`);
         setFridgeItems(response.data.items);
       } catch (error) {
         console.error('냉장고 재료를 가져오는데 실패했습니다.', error);
@@ -29,7 +34,7 @@ const MainPage = () => {
     };
 
     fetchFridgeItems();
-  }, []); // 빈 배열은 컴포넌트가 처음 마운트될 때 한 번만 실행됨
+  }, [currentUserId]); // currentUserId가 변경될 때마다 재실행
 
 
   return (
