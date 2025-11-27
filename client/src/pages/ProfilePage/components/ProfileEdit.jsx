@@ -1,38 +1,70 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/ProfileEdit.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function ProfileEdit() {
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
-  alert("개인정보 수정 완료!");
-  navigate("/profile");
-};
+  const [user, setUser] = useState(null);
 
-  // 임시 user 데이터 (나중에 실제 백엔드와 연결 가능)
-  const [user, setUser] = useState({
-    name: "한성",
-    address: "서울특별시 성북구 안암로 16길 116",
-    id: "hansung",
-    pw: "1234",
-    isVegan: false,
-    allergies: ["우유", "새우"],
-  });
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (!stored) {
+      navigate("/login");
+      return;
+    }
+
+    const parsed = JSON.parse(stored);
+
+    setUser({
+      ...parsed,
+      isVegan: parsed.is_vegan,   // Django → React 변환
+      user_id: parsed.user_id,   // ★ DB 실제 user_id
+    });
+  }, []);
+
+  if (!user) return null;
 
   const allergyOptions = ["우유", "땅콩", "새우", "달걀", "생선", "밀"];
 
-  // 체크박스 업데이트 로직
   const toggleAllergy = (item) => {
     setUser((prev) => {
-      const exists = prev.allergies.includes(item);
+      const exists = prev.allergies?.includes(item);
       return {
         ...prev,
         allergies: exists
           ? prev.allergies.filter((a) => a !== item)
-          : [...prev.allergies, item],
+          : [...(prev.allergies || []), item],
       };
     });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const res = await axios.put("http://127.0.0.1:8000/api/profile/update/", {
+        user_id: user.user_id,          // ★ 진짜 key
+        name: user.name,
+        address: user.address,
+        is_vegan: user.isVegan,
+        allergies: user.allergies || [],
+      });
+
+      alert("개인정보 수정 완료!");
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...user,
+          is_vegan: user.isVegan,
+        })
+      );
+
+      navigate("/profile");
+    } catch (err) {
+      console.error("❌ update_profile API error:", err.response?.data || err);
+      alert("수정 실패! 다시 시도해주세요.");
+    }
   };
 
   return (
@@ -55,7 +87,8 @@ export default function ProfileEdit() {
         />
 
         <label>ID</label>
-        <input type="text" value={user.id} disabled />
+        {/* ★ user.user_id 가 맞는 값 */}
+        <input type="text" value={user.user_id} disabled />
 
         <label>비건 여부</label>
         <select
@@ -74,7 +107,7 @@ export default function ProfileEdit() {
             <label key={item} className="allergy-item">
               <input
                 type="checkbox"
-                checked={user.allergies.includes(item)}
+                checked={user.allergies?.includes(item)}
                 onChange={() => toggleAllergy(item)}
               />
               {item}
@@ -84,7 +117,10 @@ export default function ProfileEdit() {
       </div>
 
       <div className="edit-buttons">
-        <button className="save-btn" onClick={handleSubmit}>저장</button>
+        <button className="save-btn" onClick={handleSubmit}>
+          저장
+        </button>
+
         <button className="cancel-btn" onClick={() => navigate("/profile")}>
           취소
         </button>

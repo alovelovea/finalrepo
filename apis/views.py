@@ -527,3 +527,41 @@ def ingredient_list_view(request):
 
     return JsonResponse(data, safe=False)
 
+# ============================
+# 🔥 개인정보 수정 반영(장승환)
+# ============================
+@api_view(['PUT'])
+@csrf_exempt
+def update_profile(request):
+    try:
+        user_id = request.data.get("user_id")
+        name = request.data.get("name")
+        address = request.data.get("address")
+        is_vegan = request.data.get("is_vegan")
+        allergies = request.data.get("allergies", [])
+
+        person = Person.objects.get(user_id=user_id)
+
+        # 👤 사용자 기본 정보 업데이트
+        person.name = name
+        person.address = address
+        person.is_vegan = is_vegan
+        person.save()
+
+        # ⭐ 알레르기 관계 초기화 후 다시 저장
+        PersonAllergy.objects.filter(person=person).delete()
+
+        for al_name in allergies:
+            allergy_obj, _ = Allergy.objects.get_or_create(allergy_name=al_name)
+            PersonAllergy.objects.create(person=person, allergy=allergy_obj)
+
+        return JsonResponse({"message": "프로필 수정 완료"}, status=200)
+
+    except Person.DoesNotExist:
+        return JsonResponse({"error": "사용자를 찾을 수 없습니다."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+
+

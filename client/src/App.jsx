@@ -14,6 +14,7 @@ import MembershipPage from "./pages/LoginPage/MembershipPage";
 import RecognizedIngredientsPage from './pages/AddIngredientPage/RecognizedIngredientsPage';
 import UploadPage from './pages/AddIngredientPage/UploadPage';
 
+import ProfileEdit from './pages/ProfilePage/components/ProfileEdit';
 
 const AppContent = () => {
   const location = useLocation();
@@ -33,6 +34,7 @@ const AppContent = () => {
         <Route path="/ingredient" element={<IngredientPage />} />
         <Route path="/shopping" element={<ShoppingPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile-edit" element={<ProfileEdit />} />
         <Route path="/recipes/:recipeId" element={<RecipeDetailPage />} />
         <Route path="/recognized-ingredients" element={<RecognizedIngredientsPage />} />
         <Route path="/upload" element={<UploadPage />} />

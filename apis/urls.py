@@ -16,6 +16,7 @@ from .views import (
     create_shopping_records_api,
     recipe_detail_api,
     shopping_ingredient_api,
+    update_profile,
 )
 
 urlpatterns = [
@@ -24,6 +25,9 @@ urlpatterns = [
     # 회원가입
     path('api/signup/', signup_user, name='signup_user'),
 
+    # 프로필 수정사항
+    path("api/profile/update/", update_profile, name="update_profile"),
+    
     # GPT LLM 분석 호출
     path('classify/', classify_query_view, name='classify_query'),
     
