@@ -24,19 +24,26 @@ def login_user(request):
         person = Person.objects.get(user_id=user_id)
 
         # 비밀번호 일치 확인
-        if person.password_2 == password_2:
-            return JsonResponse({
-                "message": "로그인 성공",
-                "user_id": person.user_id,
-                "name": person.name,
-                "address": person.address,
-                "is_vegan": person.is_vegan
-            }, status=200)
-        else:
+        if person.password_2 != password_2:
             return JsonResponse({"error": "비밀번호가 일치하지 않습니다."}, status=401)
+
+        # ⭐ 추가: 사용자 알러지 목록 불러오기
+        allergies = PersonAllergy.objects.filter(person=person).select_related("allergy")
+        allergy_list = [a.allergy.allergy_name for a in allergies]
+
+        # 🔥 로그인 성공 응답 (알러지 포함)
+        return JsonResponse({
+            "message": "로그인 성공",
+            "user_id": person.user_id,
+            "name": person.name,
+            "address": person.address,
+            "is_vegan": person.is_vegan,
+            "allergies": allergy_list   # ← ⭐ 여기에 알러지 추가!
+        }, status=200)
 
     except Person.DoesNotExist:
         return JsonResponse({"error": "존재하지 않는 사용자입니다."}, status=404)
+
 
 
 # ✅ 회원가입
