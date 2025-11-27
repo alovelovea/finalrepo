@@ -49,20 +49,6 @@
 
 
 
-.form-row-image {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 16px;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-/* 업로드 박스 가로 FULL */
-.upload-wrapper-full {
-  width: 100%;
-}
-
-
 /* 라벨 */
 .input-label {
    min-width: 120px;      /* 너비 고정 → 정렬 깔끔 */

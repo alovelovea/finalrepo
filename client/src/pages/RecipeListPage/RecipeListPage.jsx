@@ -10,30 +10,13 @@ const RecipeListPage = () => {
 
   const userId = localStorage.getItem("user_id");
 
-  // ⭐ 이미지 경로 자동 구분함수
-  const getImageURL = (fileName) => {
-    if (!fileName) return "/FOOD/default.png";
-
-    // 업로드 이미지 (/media/... 형태)
-    if (fileName.startsWith("/media/")) {
-      return `http://localhost:8000${fileName}`;
-    }
-
-    // 파일명만 있으면 정적 이미지
-    return `/FOOD/${fileName}`;
-  };
-
   useEffect(() => {
     if (!userId) return;
 
     fetch(`http://localhost:8000/api/recipes/?user_id=${userId}`)
       .then((res) => res.json())
       .then((data) => {
-        const mapped = data.recipes.map((item) => ({
-          ...item,
-          image: getImageURL(item.image),
-        }));
-        setRecipes(mapped);
+        setRecipes(data.recipes);
       })
       .catch((err) => console.error("API Error:", err));
   }, [userId]);
@@ -61,12 +44,23 @@ const RecipeListPage = () => {
     });
   };
 
-  const korean = sortByFavorite(filtered.filter((r) => r.category === "한식"));
-  const western = sortByFavorite(filtered.filter((r) => r.category === "양식"));
-  const japanese = sortByFavorite(filtered.filter((r) => r.category === "일식"));
-  const chinese = sortByFavorite(filtered.filter((r) => r.category === "중식"));
+  const korean = sortByFavorite(
+    filtered.filter((r) => r.category === "한식")
+  );
+  const western = sortByFavorite(
+    filtered.filter((r) => r.category === "양식")
+  );
+  const japanese = sortByFavorite(
+    filtered.filter((r) => r.category === "일식")
+  );
+  const chinese = sortByFavorite(
+    filtered.filter((r) => r.category === "중식")
+  );
 
-  const goDetail = (id) => navigate(`/recipes/${id}`);
+  // 🔥 카드 클릭 시 상세 페이지로 이동
+  const goDetail = (id) => {
+    navigate(`/recipes/${id}`);
+  };
 
   return (
     <div className="recipe-list-container">
@@ -79,10 +73,33 @@ const RecipeListPage = () => {
         <span className="search-icon">🔍</span>
       </div>
 
-      <RecipeCategory title="한식" items={korean} onFavoriteToggle={toggleFavorite} onCardClick={goDetail} />
-      <RecipeCategory title="양식" items={western} onFavoriteToggle={toggleFavorite} onCardClick={goDetail} />
-      <RecipeCategory title="일식" items={japanese} onFavoriteToggle={toggleFavorite} onCardClick={goDetail} />
-      <RecipeCategory title="중식" items={chinese} onFavoriteToggle={toggleFavorite} onCardClick={goDetail} />
+      <RecipeCategory
+        title="한식"
+        items={korean}
+        onFavoriteToggle={toggleFavorite}
+        onCardClick={goDetail}
+      />
+
+      <RecipeCategory
+        title="양식"
+        items={western}
+        onFavoriteToggle={toggleFavorite}
+        onCardClick={goDetail}
+      />
+
+      <RecipeCategory
+        title="일식"
+        items={japanese}
+        onFavoriteToggle={toggleFavorite}
+        onCardClick={goDetail}
+      />
+
+      <RecipeCategory
+        title="중식"
+        items={chinese}
+        onFavoriteToggle={toggleFavorite}
+        onCardClick={goDetail}
+      />
     </div>
   );
 };

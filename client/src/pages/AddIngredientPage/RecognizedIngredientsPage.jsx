@@ -1,6 +1,7 @@
 // src/pages/AddIngredientPage/RecognizedIngredientsPage.jsx
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import AddIngredientDialog from './components/AddIngredientDialog';
 import './css/RecognizedIngredientsPage.css';
 
@@ -35,7 +36,7 @@ const RecognizedIngredientsPage = () => {
       ...item,
       quantity,
       unit,
-      isEditing: false,   // ✅ 수량 직접 입력 모드 플래그
+      isEditing: false, // ✅ 수량 직접 입력 모드 플래그
     };
   });
 
@@ -73,11 +74,54 @@ const RecognizedIngredientsPage = () => {
       ingredient_img: ing.ingredient_img || null,
       quantity: 1,
       unit: ing.unit || '',
-      isEditing: false,   // ✅ 새로 추가된 재료도 기본값 false
+      isEditing: false, // ✅ 새로 추가된 재료도 기본값 false
     }));
 
     setItems((prev) => [...prev, ...newItems]);
     setIsDialogOpen(false);
+  };
+
+  // 🔥 재료 인식 완료 → Fridge에 저장
+  const handleConfirm = async () => {
+    const userId = localStorage.getItem('user_id');
+
+    if (!userId) {
+      alert('로그인 정보를 찾을 수 없습니다. 다시 로그인 해주세요.');
+      navigate('/login');
+      return;
+    }
+
+    // ingredient_id가 있는 항목만 보내기
+    const payloadItems = items
+      .filter((it) => it.ingredient_id)
+      .map((it) => ({
+        ingredient_id: it.ingredient_id,
+        quantity:
+          it.quantity === '' || it.quantity == null ? 1 : Number(it.quantity),
+      }));
+
+    if (payloadItems.length === 0) {
+      alert('저장할 재료가 없습니다.');
+      return;
+    }
+
+    try {
+      const res = await axios.post('http://127.0.0.1:8000/api/fridge/save/', {
+        user_id: userId,
+        items: payloadItems,
+      });
+
+      if (res.status === 200) {
+        alert('냉장고에 재료가 저장되었습니다.');
+        // ✅ 인식 완료 후 홈으로 이동 (원하면 /ingredient로 바꿔도 됨)
+        navigate('/home');
+      } else {
+        alert('저장에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (err) {
+      console.error('냉장고 저장 중 오류:', err);
+      alert('냉장고에 저장하는 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -101,9 +145,7 @@ const RecognizedIngredientsPage = () => {
                 )}
               </div>
 
-              <div className="ingredient-name">
-                {item.ingredient_name}
-              </div>
+              <div className="ingredient-name">{item.ingredient_name}</div>
 
               <div className="ingredient-quantity-row">
                 <button
@@ -113,7 +155,7 @@ const RecognizedIngredientsPage = () => {
                   -
                 </button>
 
-                {/* ✅ 여기만 수정: 수량 더블클릭 → 직접 입력 */}
+                {/* 수량 더블클릭 → 직접 입력 */}
                 {item.isEditing ? (
                   <input
                     type="text"
@@ -202,11 +244,13 @@ const RecognizedIngredientsPage = () => {
             재료 다시 인식
           </button>
 
-          <Link to="/home" className="recognized-btn-link">
-            <button className="recognized-btn recognized-btn--green">
-              재료 인식 완료
-            </button>
-          </Link>
+          {/* 🔥 인식 완료 → Fridge 저장 후 페이지 이동 */}
+          <button
+            className="recognized-btn recognized-btn--green"
+            onClick={handleConfirm}
+          >
+            재료 인식 완료
+          </button>
         </div>
       </div>
 

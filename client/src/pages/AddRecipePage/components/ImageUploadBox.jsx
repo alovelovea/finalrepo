@@ -1,50 +1,32 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import "../css/ImageUploadBox.css";
 
-export default function ImageUploadBox({ file, setFile }) {
+export default function ImageUploadBox({ onImageSelect }) {
   const fileRef = useRef();
   const [preview, setPreview] = useState(null);
 
-  // 🔥 file 변경 시 preview 갱신
-  useEffect(() => {
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPreview(url);
-      return () => URL.revokeObjectURL(url);
-    }
-  }, [file]);
-
-  // 🔥 파일 선택 처리
+  // 파일 선택 처리
   const handleSelect = (e) => {
-    const selected = e.target.files[0];
-    if (selected) {
-      setFile(selected);
-      setPreview(URL.createObjectURL(selected));
+    const file = e.target.files[0];
+    if (file) {
+      onImageSelect(file);          // Django FormData로 넘길 원본 파일 전달
+      setPreview(URL.createObjectURL(file)); // 미리보기 표시 (너 디자인 유지)
     }
   };
 
   return (
-    <div
-      className="upload-container"
-      onClick={() => fileRef.current.click()}
-      style={{ cursor: "pointer" }}
-    >
+    <label className="upload-container" onClick={() => fileRef.current.click()}>
       <div className="upload-box dynamic">
 
-        {/* 이미지 미리보기 */}
         {preview ? (
-          <img
-            src={preview}
-            alt="preview"
-            className="upload-preview-auto"
-            onClick={(e) => e.stopPropagation()}   // ← 이미지 눌러도 파일창 안 열림
-          />
+          <img src={preview} alt="preview" className="upload-preview-auto" />
         ) : (
           <>
             <span className="upload-icon">📷</span>
             <span className="upload-text">이미지 업로드</span>
           </>
         )}
+
       </div>
 
       <input
@@ -54,6 +36,6 @@ export default function ImageUploadBox({ file, setFile }) {
         accept="image/*"
         onChange={handleSelect}
       />
-    </div>
+    </label>
   );
 }

@@ -40,11 +40,14 @@ export default function Signup() {
       });
 
       if (res.status === 201) {
-        // (선택) 필요하면 clear 제거해도 됨
+        // 로그인 정보 저장
         localStorage.setItem("user_id", res.data.user_id);
         localStorage.setItem("name", res.data.name);
 
-        navigate("/upload");
+        // 🔥 회원가입 → 업로드로 이동 (from: 'signup' 표시)
+        navigate("/upload", {
+          state: { from: "signup" },
+        });
       }
     } catch (err) {
       if (err.response?.data?.error) setError(err.response.data.error);
