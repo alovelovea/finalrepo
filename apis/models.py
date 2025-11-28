@@ -45,15 +45,21 @@ class Ingredient(models.Model):
     ingredient_id = models.AutoField(primary_key=True)
     ingredient_name = models.CharField(max_length=100)
     ingredient_img = models.CharField(max_length=200, blank=True, null=True)
-    unit = models.CharField(max_length=20)
+    unit = models.CharField(max_length=20)  # g, 개, ml 등
     ingredient_category = models.CharField(max_length=50)
+
+    # 가격: base_unit 기준 가격
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    # 🆕 추가: 유지기간 (일)
-    shelf_life = models.IntegerField(default=3)  # ex) 3일, 5일, 7일 등
+    # 🆕 추가: 기본 단위 (예: 10g, 20g 등)
+    base_unit = models.IntegerField(default=1)  # 기본값: 1 → 기존 CSV와 호환 유지
+
+    # 유지기간
+    shelf_life = models.IntegerField(default=3)
 
     def __str__(self):
         return self.ingredient_name
+
 
 
 
@@ -160,17 +166,21 @@ class Shopping(models.Model):
 
         # INSERT 시 1회만 계산
         if not self.pk:
-            self.unit_price = self.ingredient.price
+            # 가격 계산: base_unit 기준 가격
+            self.unit_price = self.ingredient.price  # g당 가격 같은 단가
             self.price = self.unit_price * self.quantity
 
         super().save(*args, **kwargs)
 
         # 첫 INSERT 후 냉장고 자동 생성
         if not self.added_to_fridge:
+            # ⭐ fridge에 들어갈 실제 양 = 구매량 × base_unit
+            actual_quantity = self.quantity * self.ingredient.base_unit
+
             fridge_item = Fridge.objects.create(
                 person=self.person,
                 ingredient=self.ingredient,
-                f_quantity=self.quantity,
+                f_quantity=actual_quantity,    # ⭐ base_unit 반영된 실제 수량
                 added_date=self.purchased_date,
             )
 
@@ -181,3 +191,4 @@ class Shopping(models.Model):
 
     def __str__(self):
         return f"{self.person.name}의 구매: {self.ingredient.ingredient_name}"
+

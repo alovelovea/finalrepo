@@ -8,7 +8,7 @@ function RecipeDetailPage() {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ⭐ 추가된 상태
+  // ⭐ 구조화된 부족 재료 배열
   const [missingIngredients, setMissingIngredients] = useState([]);
   const [showMissingModal, setShowMissingModal] = useState(false);
 
@@ -22,35 +22,14 @@ function RecipeDetailPage() {
     return `/FOOD/${fileName}`;
   };
 
-  // ⭐ 부족한 재료 → 쇼핑하기 기능
-  const handleGoShopping = async () => {
-  const user_id = localStorage.getItem("user_id");
-
-  try {
-    await fetch("http://localhost:8000/api/shopping/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id,
-        items: missingIngredients,
-      }),
-    });
-
-    setShowMissingModal(false);
-
-    // ⭐⭐⭐ 부족 재료를 ShoppingPage로 전달함 ⭐⭐⭐
+  // ⭐ 쇼핑 페이지로 이동 (DB 저장 X)
+  const handleGoShopping = () => {
     navigate("/shopping", {
       state: { missingItems: missingIngredients }
     });
+  };
 
-  } catch (err) {
-    console.error("쇼핑 저장 실패:", err);
-    alert("쇼핑 목록 저장 중 오류 발생");
-  }
-};
-
-
-  // ⭐ 요리 버튼
+  // ⭐ 요리 실행
   const handleSelect = () => {
     const user_id = localStorage.getItem("user_id");
 
@@ -63,6 +42,7 @@ function RecipeDetailPage() {
       .then(data => {
 
         if (data.status === "insufficient") {
+          // 🔥 이제 data.shortage는 구조화된 객체 배열
           setMissingIngredients(data.shortage);
           setShowMissingModal(true);
           return;
@@ -82,23 +62,23 @@ function RecipeDetailPage() {
   };
 
   const handleDelete = () => {
-    if (window.confirm("정말로 이 레시피를 삭제하시겠습니까?")) {
-      fetch(`http://localhost:8000/api/recipes/${recipeId}/`, {
-        method: 'DELETE',
+    if (!window.confirm("정말로 이 레시피를 삭제하시겠습니까?")) return;
+
+    fetch(`http://localhost:8000/api/recipes/${recipeId}/`, {
+      method: 'DELETE',
+    })
+      .then(res => {
+        if (res.ok) {
+          alert("레시피가 삭제되었습니다.");
+          navigate(-1);
+        } else {
+          res.json().then(data => alert(`삭제 실패: ${data.error}`));
+        }
       })
-        .then(res => {
-          if (res.ok) {
-            alert("레시피가 삭제되었습니다.");
-            navigate(-1);
-          } else {
-            res.json().then(data => alert(`삭제 실패: ${data.error}`));
-          }
-        })
-        .catch(err => {
-          console.error("API ERROR:", err);
-          alert("삭제 중 오류가 발생했습니다.");
-        });
-    }
+      .catch(err => {
+        console.error("API ERROR:", err);
+        alert("삭제 중 오류가 발생했습니다.");
+      });
   };
 
   useEffect(() => {
@@ -134,18 +114,23 @@ function RecipeDetailPage() {
 
             <ul className="list-disc pl-5 text-gray-700 mb-4">
               {missingIngredients.map((item, idx) => (
-                <li key={idx}>- {item}</li>
+                <li key={idx}>
+                  {item.name}: {item.missing_qty}{item.unit} 부족
+                  <br />
+                  
+                </li>
               ))}
             </ul>
 
             <div className="flex justify-end gap-3">
-              <button 
+              <button
                 onClick={() => setShowMissingModal(false)}
                 className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
               >
                 닫기
               </button>
-              <button 
+
+              <button
                 onClick={handleGoShopping}
                 className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
@@ -156,9 +141,8 @@ function RecipeDetailPage() {
         </div>
       )}
 
-      {/* 기존 상세 페이지 UI */}
+      {/* 기존 페이지 UI */}
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
-
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">{recipe.name}</h2>
           <button onClick={handleClose} className="text-gray-500 hover:text-gray-800 text-xl">✕</button>
@@ -168,11 +152,7 @@ function RecipeDetailPage() {
 
           <div className="md:col-span-2 flex flex-col gap-4">
             <div className="w-full h-64 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
-              {recipe.image ? (
-                <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-gray-400">이미지 없음</span>
-              )}
+              <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
             </div>
 
             <div>
@@ -187,15 +167,15 @@ function RecipeDetailPage() {
 
           <div>
             <h3 className="font-semibold mb-2">[조리 설명]</h3>
-            <div className="max-h-72 overflow-y-auto text-sm text-gray-700">
-              <p className="whitespace-pre-line">{recipe.description}</p>
+            <div className="max-h-72 overflow-y-auto text-sm text-gray-700 whitespace-pre-line">
+              {recipe.description}
             </div>
           </div>
 
         </div>
 
         <div className="w-full border-t p-4 flex justify-end gap-4 bg-white">
-          <button 
+          <button
             onClick={handleSelect}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md"
           >
@@ -209,7 +189,6 @@ function RecipeDetailPage() {
             삭제
           </button>
         </div>
-
       </div>
     </div>
   );

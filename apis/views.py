@@ -118,6 +118,8 @@ def shopping_ingredient_api(request):
         "ingredient_name",
         "ingredient_img",
         "price",
+        "unit",
+        "base_unit",
     )
 
     data = [
@@ -125,7 +127,9 @@ def shopping_ingredient_api(request):
             "ingredient_id": ing["ingredient_id"],
             "name": ing["ingredient_name"],
             "price": float(ing["price"]),
-            "img": ing["ingredient_img"],  # ex: 'gochujang.jpg'
+            "unit": ing["unit"],
+            "base_unit": ing["base_unit"],
+            "img": ing["ingredient_img"],
         }
         for ing in ingredients
     ]
@@ -530,6 +534,10 @@ def ingredient_list_view(request):
 
 
 from decimal import Decimal
+from django.db import transaction
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+
 @api_view(['POST'])
 @csrf_exempt
 def use_recipe(request, recipe_id):
@@ -547,17 +555,32 @@ def use_recipe(request, recipe_id):
 
     shortage_list = []
 
-    # 1️⃣ 부족 여부 전체 검사
+    # 1️⃣ 부족 재료 검사 (Decimal로 변경)
     for r in recipe_ingredients:
         ing = r.ingredient
-        required_qty = float(r.r_quantity)
 
+        required_qty = Decimal(str(r.r_quantity))  # 요구량 → Decimal
+        base_unit = Decimal(str(ing.base_unit))
+
+        # 냉장고 재고 총량 (Decimal 합산)
         fridge_items = Fridge.objects.filter(person=person, ingredient=ing)
-        total_qty = sum([float(f.f_quantity) for f in fridge_items])
+        total_qty = sum((f.f_quantity for f in fridge_items), Decimal('0'))
 
         if total_qty < required_qty:
-            shortage_list.append(f"{ing.ingredient_name}: {required_qty - total_qty}{ing.unit} 부족")
+            missing_qty = required_qty - total_qty
 
+            shortage_list.append({
+                "ingredient_id": ing.ingredient_id,
+                "name": ing.ingredient_name,
+                "unit": ing.unit,
+                "base_unit": ing.base_unit,
+                "required_qty": float(required_qty),
+                "have_qty": float(total_qty),
+                "missing_qty": float(missing_qty),
+                "purchase_qty": float(missing_qty / base_unit)  # “몇 개”를 사야 하는지
+            })
+
+    # 부족하면 프론트로 전달
     if shortage_list:
         return JsonResponse({
             "status": "insufficient",
@@ -565,13 +588,17 @@ def use_recipe(request, recipe_id):
             "shortage": shortage_list
         }, status=400)
 
-    # 2️⃣ 실제 재료 차감 (유통기한 이른 순서)
+    # 2️⃣ 냉장고에서 차감 (Decimal 기반 FIFO 정렬)
     try:
         with transaction.atomic():
             for r in recipe_ingredients:
                 ing = r.ingredient
-                required_qty = float(r.r_quantity)
-                fridge_items = Fridge.objects.filter(person=person, ingredient=ing).order_by('expiry_date')
+                required_qty = Decimal(str(r.r_quantity))
+
+                # 소비는 유통기한 가까운 순
+                fridge_items = Fridge.objects.filter(
+                    person=person, ingredient=ing
+                ).order_by('expiry_date')
 
                 needed = required_qty
 
@@ -579,12 +606,12 @@ def use_recipe(request, recipe_id):
                     if needed <= 0:
                         break
 
-                    if float(f.f_quantity) > needed:
-                        f.f_quantity = float(f.f_quantity) - needed
+                    if f.f_quantity > needed:
+                        f.f_quantity = f.f_quantity - needed
                         f.save()
-                        needed = 0
+                        needed = Decimal('0')
                     else:
-                        needed -= float(f.f_quantity)
+                        needed = needed - f.f_quantity
                         f.delete()
 
     except Exception as e:
