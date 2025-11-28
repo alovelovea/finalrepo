@@ -18,6 +18,7 @@ from .views import (
     shopping_ingredient_api,
     use_recipe,
     update_profile,
+    get_shopping_history,
 )
 
 urlpatterns = [
@@ -67,5 +68,6 @@ urlpatterns = [
     path('api/delete_ingredient/<int:fridge_id>/', delete_ingredient, name='delete_ingredient'),
     path('api/fridge/use-recipe/<int:recipe_id>/', use_recipe, name='use_recipe'),
    
+    path("api/shopping/history/", get_shopping_history, name="get_shopping_history"),
 
 ]

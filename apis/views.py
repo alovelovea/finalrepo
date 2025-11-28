@@ -632,3 +632,35 @@ def update_profile(request):
         return JsonResponse({"error": "사용자를 찾을 수 없습니다."}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+# ============================
+# 🔥 쇼핑 내역 조회 API (장승환)
+# ============================
+@api_view(['GET'])
+def get_shopping_history(request):
+    user_id = request.GET.get("user_id")
+
+    if not user_id:
+        return JsonResponse({"error": "user_id is required"}, status=400)
+
+    try:
+        person = Person.objects.get(user_id=user_id)
+    except Person.DoesNotExist:
+        return JsonResponse({"error": "user not found"}, status=404)
+
+    shopping_list = Shopping.objects.filter(person=person).select_related("ingredient")
+
+    data = [
+        {
+            "ingredient": s.ingredient.ingredient_name,
+            "quantity": float(s.quantity),
+            "price": float(s.price),
+            "date": s.purchased_date.strftime("%Y-%m-%d"),
+
+            # ⭐⭐ 추가: 이미지 URL
+            "img": f"/INGREDIENT/{s.ingredient.ingredient_img}",
+        }
+        for s in shopping_list
+    ]
+
+    return JsonResponse({"items": data}, status=200)
