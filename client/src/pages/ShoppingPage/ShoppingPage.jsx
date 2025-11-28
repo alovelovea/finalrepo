@@ -1,38 +1,99 @@
 // ...existing code...
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useLocation } from "react-router-dom";   // ⭐ 추가
 
 function formatKRW(n) {
-  const num = Number(n ?? 0);   // null/undefined면 0으로
+  const num = Number(n ?? 0);
   if (Number.isNaN(num)) return '₩0';
   return '₩' + num.toLocaleString('ko-KR');
 }
 
+function parseMissing(missingStr) {
+  const [left, right] = missingStr.split(":").map(s => s.trim());
+  const name = left;
+
+  // 부족량 숫자 추출
+  const qtyMatch = right.match(/([\d\.]+)/);
+  let qty = qtyMatch ? Number(qtyMatch[1]) : 1;
+
+  // 단위 추출
+  const unitMatch = right.match(/[a-zA-Z가-힣]+/g);
+  const unit = unitMatch ? unitMatch[0] : "";
+
+  // ⭐ "무게·부피 단위"는 g or ml 단위 → 해당 수치만큼 구매
+  // 예) 50g 부족 → qty=50
+  // ⭐ "개 단위"는 그대로 1개
+  return { name, qty, unit };
+}
+
 const ShoppingPage = () => {
-  const [products, setProducts] = useState([]); // 초기값 빈 배열
+  const [products, setProducts] = useState([]); 
   const [query, setQuery] = useState('');
-  const [cart, setCart] = useState([]); // {id, productId, qty}
+  const [cart, setCart] = useState([]);
 
- useEffect(() => {
-  const fetchIngredients = async () => {
-    try {
-      const response = await axios.get('http://localhost:8000/api/shoppingingredient/');
+  // ⭐ 부족 재료 전달받기
+  const location = useLocation();
+  const missingItems = location.state?.missingItems || [];
 
-      const mappedProducts = response.data.ingredients.map((ing) => ({
-        id: ing.ingredient_id,
-        name: ing.name,
-        price: ing.price,
-        image: `/INGREDIENT/${ing.img}`,   // ⭐ public/INGREDIENT 안에서 찾음
-      }));
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/shoppingingredient/');
 
-      setProducts(mappedProducts);
-    } catch (error) {
-      console.error('재료 목록을 가져오는데 실패했습니다.', error);
+        const mappedProducts = response.data.ingredients.map((ing) => ({
+          id: ing.ingredient_id,
+          name: ing.name,
+          price: ing.price,
+          image: `/INGREDIENT/${ing.img}`,
+        }));
+
+        setProducts(mappedProducts);
+      } catch (error) {
+        console.error('재료 목록을 가져오는데 실패했습니다.', error);
+      }
+    };
+
+    fetchIngredients();
+  }, []);
+
+  // ⭐ 부족 재료 자동 ADD TO CART (DB 저장 X)
+const effectRan = useRef(false);
+
+useEffect(() => {
+  // StrictMode 중복 실행 방지
+  if (effectRan.current) return;
+
+  if (missingItems.length === 0 || products.length === 0) return;
+
+  effectRan.current = true; // 첫 실행에서만 true
+
+  const uniqueMissing = [...new Set(missingItems)];
+
+  const parsed = uniqueMissing
+    .map(parseMissing)
+    .map((m) => {
+      const found = products.find((p) => p.name === m.name);
+      if (!found) return null;
+      return {
+        ingredient_id: found.id,
+        quantity: m.qty
+      };
+    })
+    .filter(Boolean);
+
+  parsed.forEach((item) => {
+    for (let i = 0; i < item.quantity; i++) {
+      addToCart(item.ingredient_id);
     }
-  };
+  });
 
-  fetchIngredients();
-}, []);
+}, [missingItems, products]);
+
+
+
+
+
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -85,7 +146,7 @@ const ShoppingPage = () => {
     }
 
     const purchaseData = cartItems.map((item) => ({
-      ingredient_id: item.productId, // API는 ingredient_id를 기대
+      ingredient_id: item.productId,
       quantity: item.qty,
     }));
 
@@ -133,16 +194,10 @@ const ShoppingPage = () => {
                 className="flex items-center gap-4 p-3 border rounded"
               >
                 <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
-                  {/* ✅ 실제 이미지 표시 */}
                   <img
                     src={p.image}
                     alt={p.name}
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // 이미지 없을 때 기본 텍스트
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement.textContent = '이미지';
-                    }}
                   />
                 </div>
 
@@ -172,7 +227,7 @@ const ShoppingPage = () => {
           </div>
         </div>
 
-        {/* 장바구니 요약 */}
+        {/* 장바구니 */}
         <div className="bg-white p-4 rounded-lg border shadow-sm">
           <h3 className="font-semibold mb-3">장바구니</h3>
 
@@ -187,10 +242,6 @@ const ShoppingPage = () => {
                     src={it.product.image}
                     alt={it.product.name}
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement.textContent = '이미지';
-                    }}
                   />
                 </div>
 
@@ -203,27 +254,14 @@ const ShoppingPage = () => {
 
                 <div className="flex items-center gap-3">
                   <div className="inline-flex items-center border rounded">
-                    <button
-                      onClick={() => changeQty(it.productId, -1)}
-                      className="px-2 py-1"
-                    >
-                      [-]
-                    </button>
+                    <button onClick={() => changeQty(it.productId, -1)} className="px-2 py-1">[-]</button>
                     <div className="px-4 py-1">{it.qty}</div>
-                    <button
-                      onClick={() => changeQty(it.productId, 1)}
-                      className="px-2 py-1"
-                    >
-                      [+]
-                    </button>
+                    <button onClick={() => changeQty(it.productId, 1)} className="px-2 py-1">[+]</button>
                   </div>
                   <div className="w-28 text-right font-semibold">
                     {formatKRW((it.product.price || 0) * it.qty)}
                   </div>
-                  <button
-                    onClick={() => removeFromCart(it.productId)}
-                    className="ml-3 text-xs text-red-600"
-                  >
+                  <button onClick={() => removeFromCart(it.productId)} className="ml-3 text-xs text-red-600">
                     삭제
                   </button>
                 </div>
@@ -255,4 +293,5 @@ const ShoppingPage = () => {
 };
 
 export default ShoppingPage;
+
 // ...existing code...

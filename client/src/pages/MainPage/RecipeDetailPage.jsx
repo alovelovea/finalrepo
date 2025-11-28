@@ -8,6 +8,10 @@ function RecipeDetailPage() {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ⭐ 추가된 상태
+  const [missingIngredients, setMissingIngredients] = useState([]);
+  const [showMissingModal, setShowMissingModal] = useState(false);
+
   const handleClose = () => navigate(-1);
 
   const getImageURL = (fileName) => {
@@ -18,44 +22,65 @@ function RecipeDetailPage() {
     return `/FOOD/${fileName}`;
   };
 
-const handleSelect = () => {
+  // ⭐ 부족한 재료 → 쇼핑하기 기능
+  const handleGoShopping = async () => {
   const user_id = localStorage.getItem("user_id");
 
-  fetch(`http://localhost:8000/api/fridge/use-recipe/${recipeId}/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ user_id }),
-  })
-    .then(res => res.json())
-    .then(data => {
-
-      // 🔥 1) 재료 부족 시
-      if (data.status === "insufficient") {
-        alert(
-          "재료가 부족합니다:\n\n" +
-          data.shortage.map(item => `- ${item}`).join("\n")
-        );
-        return;
-      }
-
-      // 🔥 2) 요리 성공
-      if (data.status === "success") {
-        alert('레시피의 재료가 냉장고에서 사용되었습니다.');
-        navigate(-1);
-      } else {
-        alert(data.message || '재료 사용에 실패했습니다.');
-      }
-    })
-    .catch(err => {
-      console.error("API ERROR:", err);
-      alert('오류가 발생했습니다.');
+  try {
+    await fetch("http://localhost:8000/api/shopping/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id,
+        items: missingIngredients,
+      }),
     });
+
+    setShowMissingModal(false);
+
+    // ⭐⭐⭐ 부족 재료를 ShoppingPage로 전달함 ⭐⭐⭐
+    navigate("/shopping", {
+      state: { missingItems: missingIngredients }
+    });
+
+  } catch (err) {
+    console.error("쇼핑 저장 실패:", err);
+    alert("쇼핑 목록 저장 중 오류 발생");
+  }
 };
 
 
-  
+  // ⭐ 요리 버튼
+  const handleSelect = () => {
+    const user_id = localStorage.getItem("user_id");
+
+    fetch(`http://localhost:8000/api/fridge/use-recipe/${recipeId}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id }),
+    })
+      .then(res => res.json())
+      .then(data => {
+
+        if (data.status === "insufficient") {
+          setMissingIngredients(data.shortage);
+          setShowMissingModal(true);
+          return;
+        }
+
+        if (data.status === "success") {
+          alert('레시피의 재료가 냉장고에서 사용되었습니다.');
+          navigate(-1);
+        } else {
+          alert(data.message || '재료 사용에 실패했습니다.');
+        }
+      })
+      .catch(err => {
+        console.error("API ERROR:", err);
+        alert('오류가 발생했습니다.');
+      });
+  };
+
   const handleDelete = () => {
     if (window.confirm("정말로 이 레시피를 삭제하시겠습니까?")) {
       fetch(`http://localhost:8000/api/recipes/${recipeId}/`, {
@@ -100,18 +125,47 @@ const handleSelect = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      
+      {/* ⭐ 부족 재료 모달 */}
+      {showMissingModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[999]">
+          <div className="bg-white p-6 rounded-lg w-80 shadow-lg">
+            <h3 className="font-bold text-lg mb-3">재료가 부족합니다</h3>
+
+            <ul className="list-disc pl-5 text-gray-700 mb-4">
+              {missingIngredients.map((item, idx) => (
+                <li key={idx}>- {item}</li>
+              ))}
+            </ul>
+
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setShowMissingModal(false)}
+                className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                닫기
+              </button>
+              <button 
+                onClick={handleGoShopping}
+                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                쇼핑하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 기존 상세 페이지 UI */}
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
 
-        {/* 상단 제목 */}
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">{recipe.name}</h2>
           <button onClick={handleClose} className="text-gray-500 hover:text-gray-800 text-xl">✕</button>
         </div>
 
-        {/* 본문 */}
         <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 overflow-auto">
 
-          {/* 이미지 */}
           <div className="md:col-span-2 flex flex-col gap-4">
             <div className="w-full h-64 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
               {recipe.image ? (
@@ -121,7 +175,6 @@ const handleSelect = () => {
               )}
             </div>
 
-            {/* 재료 */}
             <div>
               <h3 className="font-semibold mb-2">[재료]</h3>
               <ul className="list-disc pl-5 space-y-2 text-gray-700">
@@ -132,7 +185,6 @@ const handleSelect = () => {
             </div>
           </div>
 
-          {/* 설명 */}
           <div>
             <h3 className="font-semibold mb-2">[조리 설명]</h3>
             <div className="max-h-72 overflow-y-auto text-sm text-gray-700">
@@ -141,12 +193,9 @@ const handleSelect = () => {
           </div>
 
         </div>
-  
 
-        {/* ⭐ 하단 버튼 바 */}
-    
         <div className="w-full border-t p-4 flex justify-end gap-4 bg-white">
-                    <button 
+          <button 
             onClick={handleSelect}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md"
           >
@@ -159,7 +208,6 @@ const handleSelect = () => {
           >
             삭제
           </button>
-          
         </div>
 
       </div>

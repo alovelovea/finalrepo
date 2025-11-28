@@ -529,6 +529,7 @@ def ingredient_list_view(request):
     return JsonResponse(data, safe=False)
 
 
+from decimal import Decimal
 @api_view(['POST'])
 @csrf_exempt
 def use_recipe(request, recipe_id):
@@ -536,7 +537,6 @@ def use_recipe(request, recipe_id):
     if not user_id:
         return JsonResponse({"status": "error", "message": "user_id is required."}, status=400)
 
-    # 유저 찾기
     try:
         person = Person.objects.get(user_id=user_id)
     except Person.DoesNotExist:
@@ -545,26 +545,19 @@ def use_recipe(request, recipe_id):
     recipe = get_object_or_404(Recipe, pk=recipe_id)
     recipe_ingredients = recipe.recipeingredient_set.all()
 
-    # 1️⃣ 부족한 재료 먼저 찾기 (차감 전에 전체 검사)
-    shortage_list = []  # ex) ["고추장: 50g 부족", "양파: 없음"]
+    shortage_list = []
 
+    # 1️⃣ 부족 여부 전체 검사
     for r in recipe_ingredients:
         ing = r.ingredient
-        required_qty = r.r_quantity
+        required_qty = float(r.r_quantity)
 
-        fridge_item = Fridge.objects.filter(
-            person=person,
-            ingredient=ing
-        ).first()
+        fridge_items = Fridge.objects.filter(person=person, ingredient=ing)
+        total_qty = sum([float(f.f_quantity) for f in fridge_items])
 
-        if fridge_item is None:
-            shortage_list.append(f"{ing.ingredient_name}: 없음")
-        elif fridge_item.f_quantity < required_qty:
-            shortage_list.append(
-                f"{ing.ingredient_name}: {required_qty - fridge_item.f_quantity} 부족"
-            )
+        if total_qty < required_qty:
+            shortage_list.append(f"{ing.ingredient_name}: {required_qty - total_qty}{ing.unit} 부족")
 
-    # 🔥 하나라도 부족하면 요리 불가 → 부족 리스트 반환
     if shortage_list:
         return JsonResponse({
             "status": "insufficient",
@@ -572,29 +565,33 @@ def use_recipe(request, recipe_id):
             "shortage": shortage_list
         }, status=400)
 
-    # 2️⃣ 문제 없으면 요리 진행 → 재료 감소
+    # 2️⃣ 실제 재료 차감 (유통기한 이른 순서)
     try:
         with transaction.atomic():
             for r in recipe_ingredients:
                 ing = r.ingredient
-                required_qty = r.r_quantity
+                required_qty = float(r.r_quantity)
+                fridge_items = Fridge.objects.filter(person=person, ingredient=ing).order_by('expiry_date')
 
-                fridge_item = Fridge.objects.select_for_update().filter(
-                    person=person,
-                    ingredient=ing
-                ).first()
+                needed = required_qty
 
-                fridge_item.f_quantity -= required_qty
+                for f in fridge_items:
+                    if needed <= 0:
+                        break
 
-                if fridge_item.f_quantity <= 0:
-                    fridge_item.delete()
-                else:
-                    fridge_item.save()
+                    if float(f.f_quantity) > needed:
+                        f.f_quantity = float(f.f_quantity) - needed
+                        f.save()
+                        needed = 0
+                    else:
+                        needed -= float(f.f_quantity)
+                        f.delete()
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
     return JsonResponse({"status": "success", "message": "요리가 완료되었습니다!"})
+
 
 
 
