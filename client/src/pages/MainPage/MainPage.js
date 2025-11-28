@@ -1,40 +1,41 @@
-// ...existing code...
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import RecommendedRecipes from './RecommendedRecipes';
 import Fridge from './Fridge';
 import IngredientsList from './IngredientsList';
 
-// 임시 추천 레시피 데이터 (백엔드 연동 전까지 사용)
-const recommendedRecipeSample = [
-  { id: 1, name: '김치찌개', description: '매콤하고 깊은 맛의 김치찌개. 돼지고기와 두부가 어우러진 한국 전통 찌개입니다.' },
-  { id: 2, name: '된장찌개', description: '구수한 된장 베이스에 호박과 감자가 들어가 담백한 맛을 내는 찌개.' },
-  { id: 3, name: '불고기', description: '달콤 짭짤한 양념이 배인 소고기 볶음. 밥과 함께 먹기 좋은 대표 한식.' },
-];
-
 const MainPage = () => {
   const [selectedSection, setSelectedSection] = useState(null);
   const [fridgeItems, setFridgeItems] = useState([]); // 냉장고 재료 상태 추가
+  const [recommendedRecipes, setRecommendedRecipes] = useState([]); // 추천 레시피 상태 추가
   const currentUserId = localStorage.getItem("user_id") || null; // 로그인한 사용자 ID 가져오기
 
-  // API에서 냉장고 재료 데이터를 가져오는 useEffect 훅
+  // API에서 데이터(추천 레시피, 냉장고 재료)를 가져오는 useEffect 훅
   useEffect(() => {
-    const fetchFridgeItems = async () => {
+    const fetchData = async () => {
       if (!currentUserId) {
-        console.log("로그인한 사용자가 없어 재료를 가져오지 않습니다.");
+        console.log("로그인한 사용자가 없어 데이터를 가져오지 않습니다.");
+        setRecommendedRecipes([]);
         setFridgeItems([]);
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8000/fridge_items/?user_id=${currentUserId}`);
-        setFridgeItems(response.data.items);
+        // 두 API를 동시에 호출
+        const [recipesResponse, fridgeResponse] = await Promise.all([
+          axios.get(`http://localhost:8000/api/recipes/recommend/expiry/?user_id=${currentUserId}`),
+          axios.get(`http://localhost:8000/fridge_items/?user_id=${currentUserId}`)
+        ]);
+        
+        setRecommendedRecipes(recipesResponse.data.recipes);
+        setFridgeItems(fridgeResponse.data.items);
+
       } catch (error) {
-        console.error('냉장고 재료를 가져오는데 실패했습니다.', error);
+        console.error('데이터를 가져오는데 실패했습니다.', error);
       }
     };
 
-    fetchFridgeItems();
-  }, [currentUserId]); // currentUserId가 변경될 때마다 재실행
+    fetchData();
+  }, [currentUserId]);
 
 
   return (
@@ -46,10 +47,15 @@ const MainPage = () => {
           <div className="p-4 border rounded-lg shadow-sm bg-white">
           
             <div className="divide-y">
-              {/* 임시 데이터를 사용하여 추천 레시피 렌더링 */}
-              {recommendedRecipeSample.map((r) => (
-                <div key={r.id} className="last:border-b-0">
-                  <RecommendedRecipes id={r.id} name={r.name} description={r.description} />
+              {/* API에서 가져온 추천 레시피 중 상위 5개만 렌더링 */}
+              {recommendedRecipes.slice(0, 3).map((r) => (
+                <div key={r.recipe_id} className="last:border-b-0">
+                  <RecommendedRecipes
+                    id={r.recipe_id}
+                    name={r.recipe_name}
+                    description={`활용 가능한 재료: ${r.matched_ingredients.join(', ')}`}
+                    image={`/FOOD/${r.recipe_img}`}
+                  />
                 </div>
               ))}
             </div>
@@ -85,6 +91,7 @@ const MainPage = () => {
     </main>
   );
 };
+
 
 export default MainPage;
 // ...existing code...

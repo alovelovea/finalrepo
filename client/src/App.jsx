@@ -16,6 +16,7 @@ import UploadPage from './pages/AddIngredientPage/UploadPage';
 
 import ProfileEdit from './pages/ProfilePage/components/ProfileEdit';
 
+
 const AppContent = () => {
   const location = useLocation();
   const showHeader = !(location.pathname.startsWith('/login') || location.pathname.startsWith('/signup'));

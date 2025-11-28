@@ -16,6 +16,7 @@ from .views import (
     create_shopping_records_api,
     recipe_detail_api,
     shopping_ingredient_api,
+    use_recipe,
     update_profile,
 )
 
@@ -64,4 +65,7 @@ urlpatterns = [
     path('api/fridge_items/<int:fridge_id>/', update_fridge_item, name='update_fridge_item'),
     #ingredientPage 재료 삭제
     path('api/delete_ingredient/<int:fridge_id>/', delete_ingredient, name='delete_ingredient'),
+    path('api/fridge/use-recipe/<int:recipe_id>/', use_recipe, name='use_recipe'),
+   
+
 ]

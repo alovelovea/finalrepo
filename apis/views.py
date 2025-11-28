@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
-from .models import Person, Fridge, Ingredient, Like, Recipe, Allergy, PersonAllergy
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.utils.dateparse import parse_date
@@ -23,27 +22,25 @@ def login_user(request):
         # DB에서 user_id로 사용자 조회
         person = Person.objects.get(user_id=user_id)
 
-        # 비밀번호 일치 확인
-        if person.password_2 != password_2:
-            return JsonResponse({"error": "비밀번호가 일치하지 않습니다."}, status=401)
-
-        # ⭐ 추가: 사용자 알러지 목록 불러오기
         allergies = PersonAllergy.objects.filter(person=person).select_related("allergy")
         allergy_list = [a.allergy.allergy_name for a in allergies]
 
-        # 🔥 로그인 성공 응답 (알러지 포함)
-        return JsonResponse({
-            "message": "로그인 성공",
-            "user_id": person.user_id,
-            "name": person.name,
-            "address": person.address,
-            "is_vegan": person.is_vegan,
-            "allergies": allergy_list   # ← ⭐ 여기에 알러지 추가!
-        }, status=200)
+
+        # 비밀번호 일치 확인
+        if person.password_2 == password_2:
+            return JsonResponse({
+                "message": "로그인 성공",
+                "user_id": person.user_id,
+                "name": person.name,
+                "address": person.address,
+                "is_vegan": person.is_vegan,
+                "allergies": allergy_list 
+            }, status=200)
+        else:
+            return JsonResponse({"error": "비밀번호가 일치하지 않습니다."}, status=401)
 
     except Person.DoesNotExist:
         return JsonResponse({"error": "존재하지 않는 사용자입니다."}, status=404)
-
 
 
 # ✅ 회원가입
@@ -482,11 +479,14 @@ def create_shopping_records_api(request):
 # ============================
 # 🔥 레시피 상세 조회 API (추가)
 # ============================
-@api_view(['GET'])
+@api_view(['GET', 'DELETE'])
 def recipe_detail_api(request, recipe_id):
     try:
         recipe = Recipe.objects.get(recipe_id=recipe_id)
+    except Recipe.DoesNotExist:
+        return JsonResponse({"error": "레시피를 찾을 수 없습니다."}, status=404)
 
+    if request.method == 'GET':
         ing_list = RecipeIngredient.objects.filter(recipe=recipe)
         ingredients_list = [
             f"{ri.ingredient.ingredient_name} {float(ri.r_quantity)}{ri.ingredient.unit}"
@@ -504,8 +504,9 @@ def recipe_detail_api(request, recipe_id):
 
         return JsonResponse(data)
 
-    except Recipe.DoesNotExist:
-        return JsonResponse({"error": "레시피를 찾을 수 없습니다."}, status=404)
+    elif request.method == 'DELETE':
+        recipe.delete()
+        return JsonResponse({"message": "레시피가 성공적으로 삭제되었습니다."}, status=200)
 
 # 쇼핑 식재료 목록 API (수기추가)
 @csrf_exempt
@@ -526,6 +527,55 @@ def ingredient_list_view(request):
             item["ingredient_img"] = f"/INGREDIENT/{img}"
 
     return JsonResponse(data, safe=False)
+
+
+@api_view(['POST'])
+@csrf_exempt
+def use_recipe(request, recipe_id):
+    user_id = request.data.get('user_id')
+    if not user_id:
+        return JsonResponse({"status": "error", "message": "user_id is required."}, status=400)
+
+    try:
+        person = Person.objects.get(user_id=user_id)
+    except Person.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "User not found."}, status=404)
+
+    try:
+        with transaction.atomic():
+            recipe = get_object_or_404(Recipe, pk=recipe_id)
+            recipe_ingredients = recipe.recipeingredient_set.all()
+
+            for recipe_ingredient in recipe_ingredients:
+                ingredient_to_use = recipe_ingredient.ingredient
+                required_quantity = recipe_ingredient.r_quantity
+
+                try:
+                    # 해당 유저의 냉장고에서 재료 찾기
+                    fridge_item = Fridge.objects.get(
+                        person=person,
+                        ingredient=ingredient_to_use
+                    )
+                    
+                    if fridge_item.f_quantity >= required_quantity:
+                        fridge_item.f_quantity -= required_quantity
+                        if fridge_item.f_quantity > 0:
+                            fridge_item.save()
+                        else:
+                            # 수량이 0이 되면 삭제
+                            fridge_item.delete()
+                    else:
+                        # 재료가 부족한 경우
+                        raise Exception(f"재료 부족: {ingredient_to_use.ingredient_name}")
+
+                except Fridge.DoesNotExist:
+                    # 해당 재료가 냉장고에 없는 경우
+                    raise Exception(f"재료 없음: {ingredient_to_use.ingredient_name}")
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return JsonResponse({"status": "success", "message": "재료 사용 완료"})
 
 # ============================
 # 🔥 개인정보 수정 반영(장승환)
@@ -561,7 +611,3 @@ def update_profile(request):
         return JsonResponse({"error": "사용자를 찾을 수 없습니다."}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
-
-
-
