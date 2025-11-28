@@ -536,46 +536,67 @@ def use_recipe(request, recipe_id):
     if not user_id:
         return JsonResponse({"status": "error", "message": "user_id is required."}, status=400)
 
+    # 유저 찾기
     try:
         person = Person.objects.get(user_id=user_id)
     except Person.DoesNotExist:
         return JsonResponse({"status": "error", "message": "User not found."}, status=404)
 
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+    recipe_ingredients = recipe.recipeingredient_set.all()
+
+    # 1️⃣ 부족한 재료 먼저 찾기 (차감 전에 전체 검사)
+    shortage_list = []  # ex) ["고추장: 50g 부족", "양파: 없음"]
+
+    for r in recipe_ingredients:
+        ing = r.ingredient
+        required_qty = r.r_quantity
+
+        fridge_item = Fridge.objects.filter(
+            person=person,
+            ingredient=ing
+        ).first()
+
+        if fridge_item is None:
+            shortage_list.append(f"{ing.ingredient_name}: 없음")
+        elif fridge_item.f_quantity < required_qty:
+            shortage_list.append(
+                f"{ing.ingredient_name}: {required_qty - fridge_item.f_quantity} 부족"
+            )
+
+    # 🔥 하나라도 부족하면 요리 불가 → 부족 리스트 반환
+    if shortage_list:
+        return JsonResponse({
+            "status": "insufficient",
+            "message": "재료가 부족합니다.",
+            "shortage": shortage_list
+        }, status=400)
+
+    # 2️⃣ 문제 없으면 요리 진행 → 재료 감소
     try:
         with transaction.atomic():
-            recipe = get_object_or_404(Recipe, pk=recipe_id)
-            recipe_ingredients = recipe.recipeingredient_set.all()
+            for r in recipe_ingredients:
+                ing = r.ingredient
+                required_qty = r.r_quantity
 
-            for recipe_ingredient in recipe_ingredients:
-                ingredient_to_use = recipe_ingredient.ingredient
-                required_quantity = recipe_ingredient.r_quantity
+                fridge_item = Fridge.objects.select_for_update().filter(
+                    person=person,
+                    ingredient=ing
+                ).first()
 
-                try:
-                    # 해당 유저의 냉장고에서 재료 찾기
-                    fridge_item = Fridge.objects.get(
-                        person=person,
-                        ingredient=ingredient_to_use
-                    )
-                    
-                    if fridge_item.f_quantity >= required_quantity:
-                        fridge_item.f_quantity -= required_quantity
-                        if fridge_item.f_quantity > 0:
-                            fridge_item.save()
-                        else:
-                            # 수량이 0이 되면 삭제
-                            fridge_item.delete()
-                    else:
-                        # 재료가 부족한 경우
-                        raise Exception(f"재료 부족: {ingredient_to_use.ingredient_name}")
+                fridge_item.f_quantity -= required_qty
 
-                except Fridge.DoesNotExist:
-                    # 해당 재료가 냉장고에 없는 경우
-                    raise Exception(f"재료 없음: {ingredient_to_use.ingredient_name}")
+                if fridge_item.f_quantity <= 0:
+                    fridge_item.delete()
+                else:
+                    fridge_item.save()
 
     except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
-    return JsonResponse({"status": "success", "message": "재료 사용 완료"})
+    return JsonResponse({"status": "success", "message": "요리가 완료되었습니다!"})
+
+
 
 # ============================
 # 🔥 개인정보 수정 반영(장승환)

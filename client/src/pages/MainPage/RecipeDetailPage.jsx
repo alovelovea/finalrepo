@@ -26,10 +26,21 @@ const handleSelect = () => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ user_id }),   // ⭐ user_id 보내기
+    body: JSON.stringify({ user_id }),
   })
     .then(res => res.json())
     .then(data => {
+
+      // 🔥 1) 재료 부족 시
+      if (data.status === "insufficient") {
+        alert(
+          "재료가 부족합니다:\n\n" +
+          data.shortage.map(item => `- ${item}`).join("\n")
+        );
+        return;
+      }
+
+      // 🔥 2) 요리 성공
       if (data.status === "success") {
         alert('레시피의 재료가 냉장고에서 사용되었습니다.');
         navigate(-1);
@@ -42,6 +53,7 @@ const handleSelect = () => {
       alert('오류가 발생했습니다.');
     });
 };
+
 
   
   const handleDelete = () => {
