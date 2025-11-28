@@ -1,0 +1,49 @@
+.preview-container {
+  margin-top: 10px;
+}
+
+.preview-title {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  background: #f7f7f7;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  gap: 10px;
+}
+
+.preview-img {
+  width: 26px;
+  height: 26px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.preview-text {
+  font-size: 14px;
+  color: #333;
+}
+
+.preview-delete {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #444;
+}
+
+.preview-delete:hover {
+  color: #ff4d4d;
+}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import ImageUploadBox from "./ImageUploadBox";
 import AddRecipeIngredientDialog from "./AddRecipeIngredientDialog";
+import IngredientPreview from "./IngredientPreview";
+import CancelConfirmModal from "./CancelConfirmModal";
 import axios from "axios";
 
 export default function AddRecipeForm() {
@@ -12,9 +14,10 @@ export default function AddRecipeForm() {
   const [selectedIngredients, setSelectedIngredients] = useState([]);
 
   const [category, setCategory] = useState("한식");
-
-  // 🔥 새로운: 모달 열림 상태
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // 🔥 취소 확인 모달
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   useEffect(() => {
     axios
@@ -23,51 +26,57 @@ export default function AddRecipeForm() {
       .catch((err) => console.log("재료 불러오기 실패:", err));
   }, []);
 
- const handleSubmit = async () => {
-  if (!menuName || !recipeText) {
-    alert("메뉴 이름과 요리법은 필수입니다.");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("name", menuName);
-  formData.append("description", recipeText);
-
-  // 🔥 수량 포함한 재료 구조 생성
-  const refinedIngredients = selectedIngredients.map((ing) => ({
-    id: ing.ingredient_id,
-    name: ing.name,
-    quantity: ing.quantity || 1,
-    unit: ing.unit || ""
-  }));
-
-  formData.append("ingredients", JSON.stringify(refinedIngredients));
-  formData.append("category", category);
-
-  if (imageFile) formData.append("image", imageFile);
-
-  try {
-    const res = await axios.post(
-      "http://127.0.0.1:8000/api/add_recipe/",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
-
-    alert("레시피 저장 완료!");
-
+  // 🔥 입력 리셋 (취소)
+  const handleCancel = () => {
     setMenuName("");
     setRecipeText("");
+    setImageFile(null);
     setSelectedIngredients([]);
     setCategory("한식");
-    setImageFile(null);
+  };
 
-  } catch (err) {
-    console.log("레시피 저장 에러:", err.response?.data);
-    alert("레시피 저장 실패");
-  }
-};
+  const handleConfirmCancel = () => {
+    handleCancel();
+    setShowCancelModal(false);
+  };
 
+  // 🔥 레시피 저장
+  const handleSubmit = async () => {
+    if (!menuName || !recipeText) {
+      alert("메뉴 이름과 요리법은 필수입니다.");
+      return;
+    }
 
+    const formData = new FormData();
+    formData.append("name", menuName);
+    formData.append("description", recipeText);
+
+    const refinedIngredients = selectedIngredients.map((ing) => ({
+      id: ing.ingredient_id,
+      name: ing.name,
+      quantity: ing.quantity || 1,
+      unit: ing.unit || "",
+    }));
+
+    formData.append("ingredients", JSON.stringify(refinedIngredients));
+    formData.append("category", category);
+
+    if (imageFile) formData.append("image", imageFile);
+
+    try {
+      await axios.post(
+        "http://127.0.0.1:8000/api/add_recipe/",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      alert("레시피 저장 완료!");
+      handleCancel();
+    } catch (err) {
+      console.log("레시피 저장 에러:", err.response?.data);
+      alert("레시피 저장 실패");
+    }
+  };
 
   return (
     <div className="add-recipe-card">
@@ -102,100 +111,27 @@ export default function AddRecipeForm() {
       {/* 이미지 업로드 */}
       <div className="form-row-image">
         <label className="input-label upload-label">메뉴 사진</label>
+        <div className="upload-wrapper-full">
+          <ImageUploadBox file={imageFile} setFile={setImageFile} />
+        </div>
+      </div>
 
-  <div className="upload-wrapper-full">
-    <ImageUploadBox file={imageFile} setFile={setImageFile} />
-  </div>
-</div>
-
-      {/* 🔥 재료 선택 버튼 */}
+      {/* 재료 선택 */}
       <div className="form-row-block">
         <label className="input-label">재료</label>
-        <button
-          className="btn-add-ingredient"
-          onClick={() => setIsDialogOpen(true)}
-          style={{
-            padding: "10px 16px",
-            background: "#79AC78",
-            color: "white",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
+        <button className="btn-submit"onClick={() => setIsDialogOpen(true)}>
           재료 선택하기
         </button>
-        
-        {/* 🔥 선택된 재료 미리보기 UI */}
-  {selectedIngredients.length > 0 && (
-    <div style={{ marginTop: "10px" }}>
-      <p style={{ fontSize: "14px", color: "#444", marginBottom: "6px" }}>
-      선택된 재료 {selectedIngredients.length}개
-      </p>
 
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "10px",
-        marginTop: "6px",
-      }}
-    >
-      {selectedIngredients.map((ing) => (
-        <div
-          key={ing.ingredient_id}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            background: "#f7f7f7",
-            padding: "6px 10px",
-            borderRadius: "10px",
-            border: "1px solid #ddd",
-            gap: "10px",
-          }}
-        >
-          {/* 이미지 */}
-          <img
-            src={ing.img}
-            alt={ing.name}
-            style={{
-              width: "26px",
-              height: "26px",
-              objectFit: "cover",
-              borderRadius: "6px",
-            }}
-          />
-
-          {/* 재료명 + 수량 */}
-          <span style={{ fontSize: "14px", color: "#333" }}>
-            {ing.name} x {ing.quantity || 1}
-            {ing.unit || "개"}
-          </span>
-
-          {/* ❌ 삭제 버튼 */}
-          <button
-            onClick={() =>
-              setSelectedIngredients((prev) =>
-                prev.filter((i) => i.ingredient_id !== ing.ingredient_id)
-              )
-            }
-            style={{
-              marginLeft: "4px",
-              background: "transparent",
-              border: "none",
-              fontSize: "16px",
-              cursor: "pointer",
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-
-
+        {/* 선택된 재료 리스트 */}
+        <IngredientPreview
+  items={selectedIngredients}
+  onRemove={(id) =>
+    setSelectedIngredients((prev) =>
+      prev.filter((i) => i.ingredient_id !== id)
+    )
+  }
+/>
       </div>
 
       {/* 요리법 */}
@@ -209,7 +145,7 @@ export default function AddRecipeForm() {
         />
       </div>
 
-      {/* 버튼 */}
+      {/* 메인 버튼 */}
       <div className="btn-area">
         <div className="btn-center">
           <button className="btn-submit" onClick={handleSubmit}>
@@ -218,22 +154,38 @@ export default function AddRecipeForm() {
         </div>
 
         <div className="btn-right">
-          <button className="btn-cancel">취소</button>
+          <button
+            className="btn-cancel"
+            onClick={() => setShowCancelModal(true)}
+          >
+            취소
+          </button>
         </div>
       </div>
 
-      {/* 🔥 재료 선택 dialog */}
+      {/* 🔥 재료 선택 Dialog */}
       {isDialogOpen && (
         <AddRecipeIngredientDialog
-        ingredients={dbIngredients}
-        selectedDefault={selectedIngredients}   // ⭐ 추가!
-        onConfirm={(selectedList) => {
-        setSelectedIngredients(selectedList);
-        setIsDialogOpen(false);
-      }}
-      onClose={() => setIsDialogOpen(false)}
-      />
+          ingredients={dbIngredients}
+          selectedDefault={selectedIngredients}
+          onConfirm={(selectedList) => {
+            setSelectedIngredients(selectedList);
+            setIsDialogOpen(false);
+          }}
+          onClose={() => setIsDialogOpen(false)}
+        />
       )}
+
+      {/* 🔥 취소 확인 모달 */}
+      {showCancelModal && (
+      <CancelConfirmModal
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={() => {
+        handleCancel();
+        setShowCancelModal(false);
+    }}
+  />
+)}
     </div>
   );
 }

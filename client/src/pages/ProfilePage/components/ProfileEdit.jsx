@@ -26,7 +26,7 @@ export default function ProfileEdit() {
 
   if (!user) return null;
 
-  const allergyOptions = ["우유", "땅콩", "새우", "달걀", "생선", "밀"];
+  const allergyOptions = ["계란", "땅콩", "갑각류", "우유", "밀", "대두"];
 
   const toggleAllergy = (item) => {
     setUser((prev) => {
