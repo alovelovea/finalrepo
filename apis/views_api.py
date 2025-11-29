@@ -145,7 +145,7 @@ def classify_query_view(request):
             "다진마늘": "100g",
             }
             """
-
+    
     messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=[
