@@ -1,7 +1,7 @@
-// ...existing code...
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useLocation } from "react-router-dom";
+import './css/ShoppingPage.css';
 
 function formatKRW(n) {
   const num = Number(n ?? 0);
@@ -151,38 +151,38 @@ const ShoppingPage = () => {
   // 6) UI 렌더링
   // -----------------------
   return (
-    <div className="p-8 pt-20">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="shopping-page-container">
+      <div className="shopping-page-content">
 
         {/* 검색 영역 */}
-        <div className="bg-white p-4 rounded-lg border shadow-sm">
-          <div className="flex justify-center mb-3">
+        <div className="card">
+          <div className="search-container">
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="식재료 검색"
-              className="w-72 border rounded-full px-4 py-2 text-sm shadow-sm"
+              className="search-input"
             />
           </div>
 
           {/* 제품 리스트 */}
-          <div className="mt-4 space-y-3 max-h-96 overflow-y-auto">
+          <div className="product-list">
             {filtered.map((p) => (
-              <div key={p.id} className="flex items-center gap-4 p-3 border rounded">
+              <div key={p.id} className="product-item">
 
                 {/* 이미지 */}
-                <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
+                <div className="product-image-container">
                   <img
                     src={p.image}
                     alt={p.name}
-                    className="w-full h-full object-cover"
+                    className="product-image"
                   />
                 </div>
 
                 {/* 이름 + 단위 */}
-                <div className="flex-1">
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-sm text-gray-500">
+                <div className="product-info">
+                  <div className="product-name">{p.name}</div>
+                  <div className="product-price">
                     {formatKRW(p.price)} / {p.baseUnit}{p.unit}
                   </div>
                 </div>
@@ -190,7 +190,7 @@ const ShoppingPage = () => {
                 {/* 버튼 */}
                 <button
                   onClick={() => addToCart(p.id)}
-                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
+                  className="add-to-cart-btn"
                 >
                   ADD TO CART
                 </button>
@@ -201,36 +201,45 @@ const ShoppingPage = () => {
         </div>
 
         {/* 장바구니 */}
-        <div className="bg-white p-4 rounded-lg border shadow-sm">
-          <h3 className="font-semibold mb-3">장바구니</h3>
+        <div className="card">
+          <h3 className="cart-title">장바구니</h3>
 
-          <div className="space-y-3">
+          <div className="cart-items-container">
             {cartItems.map((it) => (
-              <div key={it.productId} className="flex items-center border rounded p-3">
+              <div key={it.productId} className="cart-item">
+
+                {/* 이미지 */}
+                <div className="cart-item-image-container">
+                  <img
+                    src={it.product.image}
+                    alt={it.product.name}
+                    className="cart-item-image"
+                  />
+                </div>
 
                 {/* 상품명 & 단위 */}
-                <div className="flex-1 px-4">
-                  <div className="font-medium">{it.product.name}</div>
-                  <div className="text-sm text-gray-500">
+                <div className="cart-item-info">
+                  <div className="product-name">{it.product.name}</div>
+                  <div className="product-price">
                     {formatKRW(it.product.price)} / {it.product.baseUnit}{it.product.unit}
                   </div>
                 </div>
 
                 {/* 수량 조절 */}
-                <div className="flex items-center gap-3">
-                  <div className="inline-flex items-center border rounded">
-                    <button onClick={() => changeQty(it.productId, -1)} className="px-2 py-1">[-]</button>
-                    <div className="px-4 py-1">{it.qty}</div>
-                    <button onClick={() => changeQty(it.productId, 1)} className="px-2 py-1">[+]</button>
+                <div className="cart-item-controls">
+                  <div className="quantity-control">
+                    <button onClick={() => changeQty(it.productId, -1)} className="quantity-button">[-]</button>
+                    <div className="quantity-display">{it.qty}</div>
+                    <button onClick={() => changeQty(it.productId, 1)} className="quantity-button">[+]</button>
                   </div>
 
                   {/* 가격 + 총량(수량 × baseUnit) */}
-                  <div className="w-28 text-right font-semibold flex flex-col items-end">
+                  <div className="cart-item-price-details">
                     <span>
                       {formatKRW((it.product.price || 0) * it.qty)}
                     </span>
 
-                    <span className="text-xs text-gray-500 mt-1">
+                    <span className="cart-item-total-quantity">
                       {it.qty * (it.product.baseUnit || 1)}
                       {it.product.unit}
                     </span>
@@ -239,7 +248,7 @@ const ShoppingPage = () => {
                   {/* 삭제 */}
                   <button
                     onClick={() => removeFromCart(it.productId)}
-                    className="ml-3 text-xs text-red-600"
+                    className="remove-from-cart-btn"
                   >
                     삭제
                   </button>
@@ -248,20 +257,20 @@ const ShoppingPage = () => {
             ))}
 
             {cartItems.length === 0 && (
-              <div className="p-4 text-center text-gray-500 border rounded">
+              <div className="empty-cart-message">
                 장바구니에 상품이 없습니다.
               </div>
             )}
           </div>
 
           {/* BUY */}
-          <div className="mt-4 flex items-center justify-end gap-4">
-            <div className="text-lg font-semibold">
+          <div className="buy-section">
+            <div className="total-price">
               총 가격: {formatKRW(totalPrice)}
             </div>
             <button
               onClick={handleBuy}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              className="buy-now-btn"
             >
               BUY NOW
             </button>

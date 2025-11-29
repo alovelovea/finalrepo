@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import '../AddIngredientPage/components/AddIngredientDialog.css'; // 스타일 재사용
-import '../AddIngredientPage/css/UploadPage.css'; // 업로드 페이지 관련 스타일
-import loadingGif from '../AddIngredientPage/assets/loading.gif';
+import '../../AddIngredientPage/components/AddIngredientDialog.css'; // 스타일 재사용
+import '../../AddIngredientPage/css/UploadPage.css'; // 업로드 페이지 관련 스타일
+import loadingGif from '../../AddIngredientPage/assets/loading.gif';
 
 const ImageUploadDialog = ({ onCancel, onSuccess }) => {
   const [loading, setLoading] = useState(false);

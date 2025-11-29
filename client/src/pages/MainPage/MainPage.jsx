@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import RecommendedRecipes from './RecommendedRecipes';
-import Fridge from './Fridge';
-import IngredientsList from './IngredientsList';
+import RecommendedRecipes from './components/RecommendedRecipes';
+import Fridge from './components/Fridge';
+import IngredientsList from './components/IngredientsList';
+import './css/MainPage.css';
 
 const MainPage = () => {
   const [selectedSection, setSelectedSection] = useState(null);
@@ -65,17 +66,17 @@ const MainPage = () => {
 }, [currentUserId]);
 
   return (
-    <main className="p-8 pt-20">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    <main className="main-page-container">
+      <div className="main-grid">
         {/* 추천 레시피 (왼쪽) */}
-        <div className="lg:col-span-1">
-          <h2 className="text-lg font-bold mb-4 text-gray-800">추천 레시피</h2>
-          <div className="p-4 border rounded-lg shadow-sm bg-white">
+        <div className="grid-col-span-1">
+          <h2 className="section-title">추천 레시피</h2>
+          <div className="card">
           
-            <div className="divide-y">
+            <div className="recipe-list-container2">
               {/* API에서 가져온 추천 레시피 중 상위 5개만 렌더링 */}
               {recommendedRecipes.slice(0, 3).map((r) => (
-                <div key={r.recipe_id} className="last:border-b-0">
+                <div key={r.recipe_id} className="recipe-item-container">
                   <RecommendedRecipes
                     id={r.recipe_id}
                     name={r.recipe_name}
@@ -89,27 +90,27 @@ const MainPage = () => {
         </div>
 
         {/* 냉장고 이미지(중앙) */}
-        <div className="lg:col-span-1">
-          <div className="p-4 border rounded-lg shadow-sm bg-white">
+        <div className="grid-col-span-1">
+          <div className="card">
             <Fridge onSelectSection={setSelectedSection} selectedSection={selectedSection} />
           </div>
         </div>
 
         {/* 재료 목록(우측) - 제목과 버튼을 카드 밖에 배치 */}
-        <div className="lg:col-span-1">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-bold text-gray-800">
+        <div className="grid-col-span-1">
+          <div className="ingredients-header">
+            <h2 className="section-title">
               {selectedSection ? `${selectedSection}번 재료목록` : '전체 재료목록'}
             </h2>
             <button
               onClick={() => setSelectedSection(null)}
-              className="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+              className="show-all-btn"
             >
               전체 식재료 보기
             </button>
           </div>
 
-          <div className="p-4 border rounded-lg shadow-sm bg-white">
+          <div className="card">
             <IngredientsList selectedSection={selectedSection} items={fridgeItems} />
           </div>
         </div>

@@ -1,5 +1,5 @@
-// ...existing code...
 import React from 'react';
+import '../css/IngredientsList.css';
 
 // 섹션 번호, 이름, 그리고 해당 섹션에 포함될 카테고리 목록을 정의합니다.
 const sectionConfig = {
@@ -30,17 +30,13 @@ const IngredientsList = ({ selectedSection = null, items = [] }) => {
     return acc;
   }, {});
 
-  // 스타일 클래스
-  const sectionHeightClass = 'h-24';
-  const singleHeightClass = 'h-96';
-
   const renderList = (list) => (
-    <ul className="space-y-2">
+    <ul className="ingredient-list">
       {list.map((ing, index) => (
-        <li key={index} className="grid grid-cols-3 items-center text-gray-700"> {/* grid와 3개의 열로 변경 */}
-          <span className="justify-self-start">• {ing.ingredient}</span> {/* 왼쪽 정렬 */}
-          <span className="justify-self-center text-gray-500 text-sm">{ing.expiry_date}</span> {/* 중앙 정렬 */}
-          <span className="justify-self-end">{ing.quantity} {ing.unit}</span> {/* 오른쪽 정렬 */}
+        <li key={index} className="ingredient-list-item">
+          <span className="ingredient-name">• {ing.ingredient}</span>
+          <span className="ingredient-expiry">{ing.expiry_date}</span>
+          <span className="ingredient-quantity-with-unit">{ing.quantity} {ing.unit}</span>
         </li>
       ))}
     </ul>
@@ -51,8 +47,8 @@ const IngredientsList = ({ selectedSection = null, items = [] }) => {
     const sectionName = sectionConfig[selectedSection]?.name || `${selectedSection}번 칸`;
     return (
       <div>
-        <div className="mb-2 font-medium">{sectionName}</div>
-        <div className={`${singleHeightClass} overflow-y-auto p-3 bg-white rounded border`}>
+        <div className="section-title-md">{sectionName}</div>
+        <div className="ingredients-list-container">
           {renderList(sectionsData[selectedSection] || [])}
         </div>
       </div>
@@ -61,11 +57,11 @@ const IngredientsList = ({ selectedSection = null, items = [] }) => {
 
   // 선택이 없는 경우: 4개의 칸을 각각 스크롤 가능한 박스로 보여줌
   return (
-    <div className="space-y-3">
+    <div className="sections-container">
       {Object.keys(sectionConfig).map((key) => (
         <div key={key}>
-          <div className="mb-2 font-medium">{sectionConfig[key].name}</div>
-          <div className={`${sectionHeightClass} overflow-y-auto p-3 bg-white rounded border`}>
+          <div className="section-title-md">{sectionConfig[key].name}</div>
+          <div className="ingredients-section-container">
             {renderList(sectionsData[key] || [])}
           </div>
         </div>
@@ -75,4 +71,3 @@ const IngredientsList = ({ selectedSection = null, items = [] }) => {
 };
 
 export default IngredientsList;
-// ...existing code...

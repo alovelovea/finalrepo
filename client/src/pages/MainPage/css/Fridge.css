@@ -1,0 +1,41 @@
+.fridge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.fridge-image-wrapper {
+    width: 100%;
+    height: 24rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.fridge-background {
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.fridge-section-button {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    outline: none;
+}
+.fridge-section-button:hover {
+    background-color: rgba(240, 253, 244, 0.4);
+}
+.fridge-section-button.selected {
+    box-shadow: 0 0 0 2px #6ee7b7;
+}
+
+.section-1 { top: 0; left: 0; }
+.section-2 { top: 0; right: 0; }
+.section-3 { bottom: 0; left: 0; }
+.section-4 { bottom: 0; right: 0; }

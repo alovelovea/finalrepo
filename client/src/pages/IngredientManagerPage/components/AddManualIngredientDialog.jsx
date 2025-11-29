@@ -1,9 +1,9 @@
 // AddManualIngredientDialog.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
-import AddIngredientDialog from '../AddIngredientPage/components/AddIngredientDialog';
-import '../AddIngredientPage/css/RecognizedIngredientsPage.css';
-import '../AddIngredientPage/components/AddIngredientDialog.css';
+import AddIngredientDialog from '../../AddIngredientPage/components/AddIngredientDialog';
+import '../../AddIngredientPage/css/RecognizedIngredientsPage.css';
+import '../css/AddIngredientDialog.css';
 
 const AddManualIngredientDialog = ({ onClose, userId }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);

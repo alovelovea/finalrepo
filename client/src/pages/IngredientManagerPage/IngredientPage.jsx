@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
-import AddManualIngredientDialog from './AddManualIngredientDialog';
-import ImageUploadDialog from './ImageUploadDialog';
-import RecognizedIngredientsDialog from './RecognizedIngredientsDialog';
+import AddManualIngredientDialog from './components/AddManualIngredientDialog';
+import ImageUploadDialog from './components/ImageUploadDialog';
+import RecognizedIngredientsDialog from './components/RecognizedIngredientsDialog';
+
+import './css/IngredientPage.css';
 
 const categories = ['전체', '신선식품', '유제품', '냉동', '냉동식품', '유통기한 임박'];
 
@@ -223,20 +225,20 @@ const fetchFridgeItems = async () => {
   return (
     <div className="p-8 pt-20">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-4">
-          <h1 className="text-xl font-semibold">재료 관리</h1>
+        <div className="ingredient-page-header">
+          <h1 className="ingredient-page-title">재료 관리</h1>
         </div>
-        <div className="flex justify-end gap-2 mb-4">
+        <div className="button-container">
           <button
             onClick={() => setIsAddManualDialogVisible(true)}
-            className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+            className="add-ingredient-btn"
             aria-label="새 재료 추가"
           >
             새 재료 추가
           </button>
           <button
             onClick={() => setIsUploadDialogVisible(true)}
-            className="border rounded-md px-3 py-1 hover:bg-gray-50"
+            className="upload-image-btn"
             aria-label="이미지 업로드"
           >
             🖼️
@@ -264,20 +266,20 @@ const fetchFridgeItems = async () => {
           />
         )}
 
-        <div className="flex items-center gap-4 mb-4">
-          <div className="flex-1">
+        <div className="search-filter-container">
+          <div className="search-input-container">
             <input
               placeholder="재료 검색"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border rounded px-4 py-2"
+              className="search-input"
             />
           </div>
-          <div className="w-64 text-right">
+          <div className="category-select-container">
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="border rounded px-3 py-2 w-full"
+              className="category-select"
             >
               {categories.map((c) => (
                 <option key={c} value={c}>
@@ -288,63 +290,63 @@ const fetchFridgeItems = async () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border shadow-sm overflow-x-auto">
-          <table className="w-full table-auto">
+        <div className="table-container">
+          <table className="ingredients-table">
             <thead>
-              <tr className="text-sm text-gray-600 border-b">
-                <th className="px-4 py-3 text-left w-20">
+              <tr className="table-header-row">
+                <th className="table-header-cell-expiry">
                   {category === '유통기한 임박' ? '남은일' : ''}
                 </th>
-                <th className="px-4 py-3 text-left">재료명</th>
-                <th className="px-4 py-3 text-left">카테고리</th>
-                <th className="px-4 py-3 text-center">수량</th>
-                <th className="px-4 py-3 text-center">작업</th>
+                <th className="table-header-cell">재료명</th>
+                <th className="table-header-cell">카테고리</th>
+                <th className="table-header-cell-center">수량</th>
+                <th className="table-header-cell-center">작업</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((it) => (
-                <tr key={it.id} className="text-sm border-b last:border-b-0">
-                  <td className="px-4 py-3">
+                <tr key={it.id} className="table-body-row">
+                  <td className="table-body-cell">
                     {category === '유통기한 임박' ? (
-                      <div className="text-sm text-red-600 font-semibold min-w-[56px] text-left">
+                      <div className="expiry-days">
                         {typeof it.expiryDays === 'number' ? `${it.expiryDays}일` : '-'}
                       </div>
                     ) : (
-                      <div className="min-w-[56px]" />
+                      <div className="expiry-placeholder" />
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium">{it.name}</div>
+                  <td className="table-body-cell">
+                    <div className="ingredient-name-display">{it.name}</div>
                   </td>
-                  <td className="px-4 py-3">{it.category}</td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="inline-flex items-center border rounded">
+                  <td className="table-body-cell">{it.category}</td>
+                  <td className="table-body-cell-center">
+                    <div className="quantity-control">
                       <button
                         onClick={() => changeAmount(it.id, -1)}
-                        className="px-2 py-1"
+                        className="quantity-button"
                       >
                         [-]
                       </button>
-                      <div className="px-3 py-1">{it.amount}</div>
+                      <div className="quantity-display">{it.amount}</div>
                       <button
                         onClick={() => changeAmount(it.id, 1)}
-                        className="px-2 py-1"
+                        className="quantity-button"
                       >
                         [+]
                       </button>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex justify-center gap-2">
+                  <td className="table-body-cell-center">
+                    <div className="actions-container">
                       <button
                         onClick={() => handleUpdate(it.id, it.amount)}
-                        className="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600"
+                        className="update-btn"
                       >
                         수정
                       </button>
                       <button
                         onClick={() => handleDelete(it.id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
+                        className="delete-btn"
                       >
                         삭제
                       </button>
@@ -354,7 +356,7 @@ const fetchFridgeItems = async () => {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan="5" className="no-results-cell">
                     결과가 없습니다.
                   </td>
                 </tr>

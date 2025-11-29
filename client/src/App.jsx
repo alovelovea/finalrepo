@@ -7,7 +7,7 @@ import RecipeListPage from './pages/RecipeListPage/RecipeListPage';
 import IngredientPage from './pages/IngredientManagerPage/IngredientPage';
 import ShoppingPage from './pages/ShoppingPage/ShoppingPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
-import RecipeDetailPage from './pages/MainPage/RecipeDetailPage';
+import RecipeDetailPage from './pages/MainPage/components/RecipeDetailPage';
 import LoginPage from "./pages/LoginPage/LoginPage";
 import MembershipPage from "./pages/LoginPage/MembershipPage";
 

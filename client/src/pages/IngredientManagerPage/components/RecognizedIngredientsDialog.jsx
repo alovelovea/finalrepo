@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import AddIngredientDialog from '../AddIngredientPage/components/AddIngredientDialog';
-import '../AddIngredientPage/css/RecognizedIngredientsPage.css';
-import '../AddIngredientPage/components/AddIngredientDialog.css';
+import AddIngredientDialog from '../../AddIngredientPage/components/AddIngredientDialog';
+import '../../AddIngredientPage/css/RecognizedIngredientsPage.css';
+import '../../AddIngredientPage/components/AddIngredientDialog.css';
 
 const parseAmount = (amount) => {
   if (!amount) return { quantity: 1, unit: '' };
