@@ -12,31 +12,57 @@ const MainPage = () => {
 
   // API에서 데이터(추천 레시피, 냉장고 재료)를 가져오는 useEffect 훅
   useEffect(() => {
-    const fetchData = async () => {
-      if (!currentUserId) {
-        console.log("로그인한 사용자가 없어 데이터를 가져오지 않습니다.");
-        setRecommendedRecipes([]);
-        setFridgeItems([]);
-        return;
-      }
-      try {
-        // 두 API를 동시에 호출
-        const [recipesResponse, fridgeResponse] = await Promise.all([
-          axios.get(`http://localhost:8000/api/recipes/recommend/expiry/?user_id=${currentUserId}`),
-          axios.get(`http://localhost:8000/fridge_items/?user_id=${currentUserId}`)
-        ]);
-        
-        setRecommendedRecipes(recipesResponse.data.recipes);
-        setFridgeItems(fridgeResponse.data.items);
+  const fetchData = async () => {
+    if (!currentUserId) {
+      setRecommendedRecipes([]);
+      setFridgeItems([]);
+      return;
+    }
 
-      } catch (error) {
-        console.error('데이터를 가져오는데 실패했습니다.', error);
-      }
-    };
+    try {
+      const [recipesResponse, fridgeResponse] = await Promise.all([
+        axios.get(`http://localhost:8000/api/recipes/recommend/expiry/?user_id=${currentUserId}`),
+        axios.get(`http://localhost:8000/fridge_items/?user_id=${currentUserId}`)
+      ]);
 
-    fetchData();
-  }, [currentUserId]);
+      setRecommendedRecipes(recipesResponse.data.recipes);
 
+      const items = fridgeResponse.data.items;
+
+      // ⭐⭐⭐⭐⭐ 여기서 재료 통합 처리 ⭐⭐⭐⭐⭐
+      const grouped = {};
+
+      items.forEach(item => {
+        const name = item.ingredient;
+
+        if (!grouped[name]) {
+          grouped[name] = {
+            ...item,
+            quantity: Number(item.quantity),
+            expiryList: [item.expiry_date],
+          };
+        } else {
+          grouped[name].quantity += Number(item.quantity);
+          grouped[name].expiryList.push(item.expiry_date);
+        }
+      });
+
+      // 최종 데이터 생성 (임박 기준을 위해 가장 빠른 expiry 선택)
+      const finalItems = Object.values(grouped).map(g => ({
+        ...g,
+        expiry_date: g.expiryList.sort()[0],   // 가장 임박한 날짜
+      }));
+
+      // ⭐ 여기에서 통합된 리스트 저장
+      setFridgeItems(finalItems);
+
+    } catch (error) {
+      console.error('데이터를 가져오는데 실패했습니다.', error);
+    }
+  };
+
+  fetchData();
+}, [currentUserId]);
 
   return (
     <main className="p-8 pt-20">

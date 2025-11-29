@@ -1,12 +1,13 @@
 import React from "react";
 import "../css/ProfileHeader.css";
+import avatarImg from "../../../image/profile_icon.png";
 
 export default function ProfileHeader({ user }) {
   return (
     <div className="profile-header-box">
       <img
         className="profile-avatar"
-        src="https://i.ibb.co/9w0D1Bt/default-avatar.png"
+         src={avatarImg}
         alt="avatar"
       />
 

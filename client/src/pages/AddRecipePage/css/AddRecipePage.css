@@ -1,183 +1,126 @@
-/* AddRecipePage.css */
-
-/* 상단 navbar와 겹치지 않게 여백 */
-.add-page-wrapper {
+/* 전체 컨테이너 */
+.arf-container {
   width: 100%;
-  padding-top: 120px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-bottom: 150px;
-  background-color: var(--color-bg);
-  display: flex;
-  justify-content: center;
-}
-
-
-
-/* 중앙 카드 */
-.add-recipe-card {
-  width: 100%;
-  max-width: 850px;
-  background-color: #fff;
-  padding: 32px 36px;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 32px 100px;
+  background: #fff;
   border-radius: 16px;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 120px;
-
-   overflow: visible;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 /* 제목 */
-.add-recipe-header {
-  font-size: 24px;
+.arf-title {
+  font-size: 26px;
   font-weight: 800;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
-.form-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;             /* label과 input 사이 간격 */
-  margin-bottom: 20px;   /* 섹션 간 간격 */
-  
-}
-
-.form-row-block {
-  width: 100%;
-  display: block;  
-  margin-bottom: 20px; /* 여백 추가 추천 */
-}
-
-
-
-.form-row-image {
+/* Figma 스타일 2-Column Grid Form */
+.arf-grid {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 16px;
-  width: 100%;
-  margin-bottom: 20px;
+  grid-template-columns: 150px 1fr;
+  align-items: start;
+  row-gap: 24px;
+  column-gap: 24px;
 }
-
-/* 업로드 박스 가로 FULL */
-.upload-wrapper-full {
-  width: 100%;
-}
-
 
 /* 라벨 */
-.input-label {
-   min-width: 120px;      /* 너비 고정 → 정렬 깔끔 */
-  padding: 10px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background-color: var(--color-surface);
-  font-size: 15px;
+.arf-label {
   font-weight: 600;
-  color: var(--color-text);
-  text-align: center;     /* 글자 중앙정렬 */
-  white-space: nowrap;
-  display: inline-block;
-  min-width: 120px;
+  font-size: 15px;
+  padding-top: 10px;
+  color: #333;
 }
 
-/* 입력창 */
-.input-box {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid #000 !important; /* ✔ 기본 테두리 검정색 */
-  border-radius: 8px;
-  background-color: #fff !important;
-  font-size: 14px;
-}
-
-.input-box:focus {
-  border-color: var(--color-primary);
-}
-
-
-/* textarea */
-.textarea-box {
+/* Input 공통 */
+.arf-input {
   width: 100%;
-  min-height: 180px;        
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;      
-  background-color: #f7f7f7; 
+  padding: 10px 14px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
   font-size: 14px;
+  background: white;
+}
+
+.arf-input:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+/* Textarea */
+.arf-textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  background: #fafafa;
   resize: none;
-  margin-bottom: 24px;
 }
 
-.textarea-box:focus {
-  border-color: var(--color-primary);
-  background-color: #ffffff;   
+.arf-textarea:focus {
+  border-color: #4CAF50;
+  background: white;
+  outline: none;
 }
-/* 구성재료 */
 
+/* 사진 업로드 영역 FULL */
+.arf-upload-wrapper {
+  width: 100%;
+}
 
-.section-title {
-  font-size: 16px;
-  font-weight: 700;
+/* 재료 선택 버튼 */
+.arf-btn-select {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #4CAF50;
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
   margin-bottom: 12px;
 }
 
-.category-group {
-  margin-bottom: 16px;
-}
-
-.category-list {
-  display: flex;
-  gap: 16px;
-}
-
-.category-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.btn-add-inger
-
-/* 버튼 */
-.btn-area {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 24px;
-  width: 100%;
-  align-items: center;
-}
-
-/* 가운데 버튼 영역 */
-.btn-center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-}
-
-/* 취소 버튼 오른쪽 정렬 */
-.btn-right {
+/* 버튼 줄 */
+.arf-btn-row {
+  margin-top: 40px;
   display: flex;
   justify-content: flex-end;
-  min-width: 80px; /* 버튼이 왼쪽으로 붙지 않도록 */
+  gap: 20px;
 }
 
-.btn-cancel {
+/* 취소 */
+.arf-btn-cancel {
   padding: 10px 18px;
-  background-color: var(--color-graybtn);
-  color: var(--color-text);
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.btn-submit {
-  padding: 10px 18px;
-  background-color: #4CAF50 !important; /* 초록색 강제 적용 */
-  color: #fff;
+  background: #E5E7EB;
   border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-   justify-content: center;
+  min-width: 110px;
+}
+
+/* 저장 */
+.arf-btn-submit {
+  padding: 10px 22px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  min-width: 110px;
+}
+
+.add-page-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 120px;    /* 🔥 고정 네비게이션 높이 보정 */
+  padding-bottom: 150px;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
 }

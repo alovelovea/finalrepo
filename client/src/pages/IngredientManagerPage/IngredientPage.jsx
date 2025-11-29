@@ -21,36 +21,67 @@ const IngredientPage = () => {
 
   const currentUserId = localStorage.getItem("user_id") || "defaultUser";
 
-  const fetchFridgeItems = async () => {
-    if (!currentUserId || currentUserId === "defaultUser") {
-      setIngredients([]);
-      return;
-    }
-    try {
-      const response = await axios.get(`http://localhost:8000/fridge_items/?user_id=${currentUserId}`);
-      const itemsWithExpiryDays = response.data.items
-        .filter(item => item.fridge_id != null) // Defensively filter out items that don't have a fridge_id
-        .map((item, index) => {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const expiryDate = new Date(item.expiry_date);
-          expiryDate.setHours(0, 0, 0, 0);
-          const diffTime = expiryDate.getTime() - today.getTime();
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          return { 
-            ...item, 
-            id: `${item.fridge_id}-${index}-${Math.random()}`, // Create a truly unique ID for React key
-            backendId: item.fridge_id, // Store original ID for backend calls
-            name: item.ingredient, 
-            amount: item.quantity, 
-            expiryDays: diffDays 
-          };
-        });
-      setIngredients(itemsWithExpiryDays);
-    } catch (error) {
-      console.error("냉장고 재료를 가져오는데 실패했습니다.", error);
-    }
-  };
+ const fetchFridgeItems = async () => {
+  if (!currentUserId || currentUserId === "defaultUser") {
+    setIngredients([]);
+    return;
+  }
+  try {
+    const response = await axios.get(`http://localhost:8000/fridge_items/?user_id=${currentUserId}`);
+    
+    const itemsWithExpiryDays = response.data.items
+      .filter(item => item.fridge_id != null)
+      .map((item, index) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const expiryDate = new Date(item.expiry_date);
+        expiryDate.setHours(0, 0, 0, 0);
+        const diffTime = expiryDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        return { 
+          ...item, 
+          id: `${item.fridge_id}-${index}-${Math.random()}`,
+          backendId: item.fridge_id,
+          name: item.ingredient, 
+          amount: item.quantity, 
+          expiryDays: diffDays 
+        };
+      });
+
+    // ⭐⭐⭐⭐⭐ 여기부터 통합 로직 추가 ⭐⭐⭐⭐⭐
+    const grouped = {};
+
+    itemsWithExpiryDays.forEach(item => {
+      const key = item.name;
+      if (!grouped[key]) {
+        grouped[key] = {
+          ...item,
+          amount: item.amount,
+          expiryList: [item.expiryDays],
+          backendIds: [item.backendId],
+        };
+      } else {
+        grouped[key].amount += item.amount;             // 수량 합산
+        grouped[key].expiryList.push(item.expiryDays);  // 여러 expiry 저장
+        grouped[key].backendIds.push(item.backendId);   // 여러 fridge_id 저장
+      }
+    });
+
+    // 대표 expiryDays → 가장 임박한 날짜만 선택
+    const finalList = Object.values(grouped).map(item => ({
+      ...item,
+      expiryDays: Math.min(...item.expiryList)
+    }));
+
+    // ⭐⭐⭐⭐⭐ setIngredients를 itemsWithExpiryDays 대신 finalList로 ⭐⭐⭐⭐⭐
+    setIngredients(finalList);
+
+  } catch (error) {
+    console.error("냉장고 재료를 가져오는데 실패했습니다.", error);
+  }
+};
+
 
   useEffect(() => {
     fetchFridgeItems();
