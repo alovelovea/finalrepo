@@ -688,3 +688,62 @@ def get_shopping_history(request):
     ]
 
     return JsonResponse({"items": data}, status=200)
+
+# 재료 저장 (유림)
+@api_view(['POST'])
+@csrf_exempt
+def manual_add_fridge_items(request):
+    """
+    body 예시:
+    {
+      "user_id": "minjae01",
+      "items": [
+        {"ingredient_id": 1, "quantity": 2},
+        {"ingredient_id": 5, "quantity": 3}
+      ]
+    }
+    """
+    data = request.data
+    user_id = data.get("user_id")
+    items = data.get("items", [])
+
+    if not user_id or not items:
+        return JsonResponse(
+            {"detail": "user_id 와 items 는 필수입니다."},
+            status=400
+        )
+
+    # 사용자 찾기
+    try:
+        person = Person.objects.get(user_id=user_id)
+    except Person.DoesNotExist:
+        return JsonResponse({"detail": "person not found"}, status=404)
+
+    today = timezone.now().date()
+    created_ids = []
+
+    for item in items:
+        ing_id = item.get("ingredient_id")
+        quantity = item.get("quantity")
+
+        if not ing_id or quantity is None:
+            continue
+
+        try:
+            ingredient = Ingredient.objects.get(pk=ing_id)
+        except Ingredient.DoesNotExist:
+            continue
+
+        # 수동 추가는 항상 새 레코드 생성 (구매 시점/유통기한 분리용)
+        fridge = Fridge.objects.create(
+            person=person,
+            ingredient=ingredient,
+            f_quantity=quantity,
+            added_date=today,  # expiry_date 는 모델 save() 에서 자동 계산
+        )
+        created_ids.append(fridge.fridge_id)
+
+    return JsonResponse(
+        {"status": "ok", "fridge_ids": created_ids},
+        status=201
+    )

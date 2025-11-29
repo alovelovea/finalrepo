@@ -80,7 +80,7 @@ const ImageUploadDialog = ({ onCancel, onSuccess }) => {
           </button>
           <button
             onClick={open}
-            className="dialog-btn dialog-btn--blue" // 다른 다이얼로그와 통일
+            className="dialog-btn dialog-btn--blue" 
             disabled={loading}
           >
             파일 선택

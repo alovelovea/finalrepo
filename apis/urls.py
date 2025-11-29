@@ -19,6 +19,7 @@ from .views import (
     use_recipe,
     update_profile,
     get_shopping_history,
+    manual_add_fridge_items
 )
 
 urlpatterns = [
@@ -69,5 +70,8 @@ urlpatterns = [
     path('api/fridge/use-recipe/<int:recipe_id>/', use_recipe, name='use_recipe'),
    
     path("api/shopping/history/", get_shopping_history, name="get_shopping_history"),
+
+    #재료 저장 (유림)
+    path('api/fridge/manual-add/', manual_add_fridge_items, name='manual_add_fridge_items'),
 
 ]
