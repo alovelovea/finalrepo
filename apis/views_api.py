@@ -14,6 +14,7 @@ import re
 # key는 공백
 llm_consistent = None
 try:
+    # 이 부분은 환경 변수나 Django 설정 파일에서 관리하는 것이 보안상 더 좋습니다.
     llm_consistent = ChatOpenAI(
         model='gpt-4o',
         api_key="",
@@ -41,6 +42,7 @@ def classify_query_view(request):
     uploaded_file = request.FILES.get("image")
     base64_image_data = None
     media_type = "image/jpeg"
+    food_text = "" # 예외 발생 시 디버깅을 위해 미리 선언
 
     if uploaded_file:
         try:
@@ -49,6 +51,7 @@ def classify_query_view(request):
         except Exception:
             return JsonResponse({"detail": "failed to read uploaded file"}, status=400, safe=False)
     else:
+        # 파일이 없을 경우 텍스트/경로 처리 로직 (기존 유지)
         user_input = (request.POST.get("query") or request.GET.get("query") or "").strip()
         if not user_input:
             try:
@@ -79,7 +82,6 @@ def classify_query_view(request):
     system_prompt = """
             [역할] 
             당신은 냉장고 이미지 속 재료를 식별하고, 아래의 '재료 목록'과 '수량 판별 규칙'에 따라 각 항목의 정확한 수량을 판별하는 전문 분석가입니다.
-            
             [작업 목표] 
             제공된 이미지에서 '재료 목록'에 있는 각 재료가 얼마나 있는지 '수량 판별 규칙'에 따라 분석하고, '출력 형식'에 맞춰 응답하세요.
             [재료 목록]
@@ -89,13 +91,13 @@ def classify_query_view(request):
             유제품: '요거트','단백질쉐이크','계란'
             냉동: '바닷가재','삼겹살','미꾸라지','소고기','목살','베이컨','오징어','고등어','새우'
             냉동식품: '바밤바','김치치즈주먹밥','김치볶음밥','냉동만두','팝콘치킨',
-                
+    
             [수량 판별 규칙]
+            명확성 원칙: 이미지에서 명확하게 식별되는 재료만 계산합니다.
             추론 원칙:
             그림자, 포장 형태, 쌓인 패턴 등 명백한 시각적 근거가 있어 가려진 부분의 수량을 확실하게 추론할 수 있다면 계산에 포함합니다.
-            수량 단위 규칙: 
-            수량 판별 규칙에서 언급되지 않은 단위로는 수량을 계산하지 않는다
-
+            수량 단위 규칙: 재료의 특성에 따라 다음 단위를 우선순위로 적용합니다.
+    
             A. '개' (낱개 카운트):
             '바밤바', '김치치즈주먹밥', '김치볶음밥', '계란', '요거트', '감자','애호박','양파',
             '청양고추','당근','무','오이','아보카도','사과','메추리알','가지','토마토'
@@ -124,28 +126,25 @@ def classify_query_view(request):
 
             E. '마리':
             '미꾸라지','바닷가재','고등어','새우','오징어' 등
-            마리 단위로 샐 수 있는 경우
+            마리 단위로 셀 수 있는 경우
 
             제외: 목록에 있으나 이미지에서 발견되지 않은 재료(0개)는 출력하지 않습니다.
             이미지에서 시각적으로 확인되지 않거나 추론 불가능한 재료는 출력하지 않습니다.
             '없음', '모름', '추정' 등의 단어는 절대 사용하지 않습니다.
-            
+    
             [출력 형식]
-            출력은 반드시 JSON 형태로, 키와 값만 포함해야 합니다. html형식도 제외
-            JSON 외의 설명이나 텍스트는 절대 포함하지 않습니다.
-
             예시:
             {
             "감자": "3개",
             "삼겹살": "500g",
             "고추장": "1kg",
-            "냉동만두": "1L",
             "두부": "1모",
             "계란": "10개",
             "다진마늘": "100g",
             }
-            """
-    
+            **주의: 이 JSON 객체 외에 어떠한 설명이나 추가 문장도 포함하지 말고, 오직 JSON 객체 자체만 출력하십시오.**
+    """
+
     messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=[
@@ -153,50 +152,48 @@ def classify_query_view(request):
         ])
     ]
 
-    response = llm_consistent.invoke(messages)
-    food_text = response.content  # LLM 응답
-
-    # 1) LLM이 준 걸 JSON으로 파싱 (실패해도 500 안 내고 안전하게 처리)
     try:
-        parsed = json.loads(food_text)   # 예: {"감자": "3개", "삼겹살": "500g"}
-    except Exception:
-        # JSON 파싱이 안 되면 그래도 "JSON 객체"로 감싸서 보냄
-        return JsonResponse(
-            {
-                "items": [],
-                "error": "LLM JSON parse error",
-                "raw": str(food_text),
-            },
-            safe=False,
-        )
+        response = llm_consistent.invoke(messages)
+        food_text = response.content  # LLM 응답
 
-    # LLM이 dict가 아닌 list 같은 걸 준 경우도 방어
-    if not isinstance(parsed, dict):
+        # JSON 객체만 추출
+        start_index = food_text.find('{')
+        end_index = food_text.rfind('}')
+        
+        if start_index != -1 and end_index != -1 and end_index > start_index:
+            json_string = food_text[start_index:end_index + 1]
+            parsed = json.loads(json_string)
+        else:
+            raise ValueError("LLM 응답에서 유효한 JSON 객체 경계가 발견되지 않았습니다.")
+
+        if not isinstance(parsed, dict):
+            raise TypeError("LLM 결과는 JSON 객체({})여야 합니다.")
+        
+    except Exception as e:
         return JsonResponse(
             {
                 "items": [],
-                "error": "LLM result must be JSON object",
-                "raw": parsed,
+                "error": f"LLM 처리 오류: {type(e).__name__}: {str(e)}",
+                "raw": food_text,
             },
+            status=500,
             safe=False,
         )
 
     food_json = parsed  # {"감자": "3개", ...}
 
-    # ---------- 2) Ingredient 테이블과 이름 매칭 ----------
+    # Ingredient 매칭
     items = []
     for name, amount in food_json.items():
-        ing = Ingredient.objects.filter(ingredient_name=name).first()
+        ing = Ingredient.objects.filter(ingredient_name=name.strip()).first()
         if not ing:
-            # Ingredient 테이블에 없는 재료는 화면에 안 보이게 스킵
             continue
 
         items.append({
             "ingredient_id": ing.ingredient_id,
             "ingredient_name": ing.ingredient_name,
             "ingredient_img": f"/INGREDIENT/{ing.ingredient_img}",
-            "amount": amount,  # LLM이 준 "3개", "500g" 그대로
+            "amount": amount,
         })
 
-    # ---------- 3) 항상 JSON 객체 형태로 반환 ----------
-    return JsonResponse({"items": items}, safe=False)
+    return JsonResponse({"items": items})
