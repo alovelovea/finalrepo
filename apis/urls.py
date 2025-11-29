@@ -19,10 +19,14 @@ from .views import (
     use_recipe,
     update_profile,
     get_shopping_history,
-    manual_add_fridge_items
+    manual_add_fridge_items,
+    get_allergy_map
 )
 
 urlpatterns = [
+    # 알러지-재료 맵
+    path('api/allergies/map/', get_allergy_map, name='get_allergy_map'),
+
     # 로그인 
     path('api/login/', login_user, name='login_user'),
     # 회원가입

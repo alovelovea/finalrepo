@@ -7,7 +7,8 @@ from django.utils.dateparse import parse_date
 from rest_framework.decorators import api_view
 from django.db import transaction
 from django.db.models import Count
-from .models import Person, Fridge, Ingredient, Like, Recipe, Allergy, PersonAllergy, RecipeIngredient,Shopping
+from collections import defaultdict
+from .models import Person, Fridge, Ingredient, Like, Recipe, Allergy, PersonAllergy, RecipeIngredient, Shopping, AllergyIngredient
 from django.core.files.storage import default_storage
 from django.conf import settings
 
@@ -747,3 +748,14 @@ def manual_add_fridge_items(request):
         {"status": "ok", "fridge_ids": created_ids},
         status=201
     )
+
+@api_view(['GET'])
+def get_allergy_map(request):
+    try:
+        allergy_ingredients = AllergyIngredient.objects.select_related('allergy', 'ingredient').all()
+        allergy_map = defaultdict(list)
+        for item in allergy_ingredients:
+            allergy_map[item.allergy.allergy_name].append(item.ingredient.ingredient_name)
+        return JsonResponse(allergy_map, status=200)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

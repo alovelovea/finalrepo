@@ -11,6 +11,30 @@ function RecipeDetailPage() {
   // ⭐ 구조화된 부족 재료 배열
   const [missingIngredients, setMissingIngredients] = useState([]);
   const [showMissingModal, setShowMissingModal] = useState(false);
+  const [userAllergies, setUserAllergies] = useState([]);
+  const [allergyMap, setAllergyMap] = useState({});
+
+  useEffect(() => {
+    // 유저 알러지 정보 불러오기
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      if (parsedUser && parsedUser.allergies) {
+        setUserAllergies(parsedUser.allergies);
+      }
+    }
+
+    // 알러지-재료 맵 불러오기
+    fetch('http://localhost:8000/api/allergies/map/')
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return res.json();
+      })
+      .then(data => setAllergyMap(data))
+      .catch(err => console.error("알러지 맵 로딩 실패:", err));
+  }, []);
 
   const handleClose = () => navigate(-1);
 
@@ -148,23 +172,45 @@ function RecipeDetailPage() {
           <button onClick={handleClose} className="text-gray-500 hover:text-gray-800 text-xl">✕</button>
         </div>
 
-        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 overflow-auto">
+        <div className="p-6 flex flex-col gap-6 flex-1 overflow-auto">
 
-          <div className="md:col-span-2 flex flex-col gap-4">
+          {/* Row 1: Picture and Ingredients */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Column 1.1: Picture */}
             <div className="w-full h-64 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
               <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
             </div>
-
+            {/* Column 1.2: Ingredients */}
             <div>
               <h3 className="font-semibold mb-2">[재료]</h3>
-              <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                {recipe.ingredients_list.map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
+              <ul className="list-disc pl-5 space-y-2 text-gray-700 max-h-56 overflow-y-auto">
+                {recipe.ingredients_list.map((item, idx) => {
+                  // 알러지 맵을 사용하여 알러지 여부 확인
+                  const isAllergic = userAllergies.some(userAllergyCategory => {
+                    const ingredientsInAllergyCategory = allergyMap[userAllergyCategory];
+                    if (!ingredientsInAllergyCategory) {
+                      return false;
+                    }
+                    // 해당 알러지 카테고리에 속하는 재료 중 하나라도 레시피 아이템 문자열에 포함되는지 확인
+                    return ingredientsInAllergyCategory.some(allergicIngredient => 
+                      item.includes(allergicIngredient)
+                    );
+                  });
+
+                  return (
+                    <li key={idx}>
+                      {item}
+                      {isAllergic && (
+                        <span className="text-red-500 font-bold ml-2">알러지 주의 식품</span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
 
+          {/* Row 2: Cooking Instructions */}
           <div>
             <h3 className="font-semibold mb-2">[조리 설명]</h3>
             <div className="max-h-72 overflow-y-auto text-sm text-gray-700 whitespace-pre-line">
