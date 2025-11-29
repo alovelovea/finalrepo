@@ -94,7 +94,7 @@ const UploadPage = () => {
 
         <div className="upload-actions">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
             className="upload-btn upload-btn--gray"
           >
             건너뛰기
