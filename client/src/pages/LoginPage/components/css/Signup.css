@@ -1,4 +1,4 @@
-/* 🧩 회원가입 카드 전체 */
+
 .signup-card {
   background: #fff;
   border-radius: 12px;
@@ -9,24 +9,24 @@
   flex-direction: column;
 }
 
-/* 본문 영역 */
+
 .signup-body {
   flex: 1 1 auto;
   overflow-y: auto;
   padding-right: 2px;
 }
 
-/* 버튼 영역 */
+
 .signup-actions {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* 버튼을 카드 기준 가운데로 */
+  align-items: center; 
 }
 
-/* 버튼 스타일 */
+
 .signup-btn {
-  width: 40%;               /* ✅ 크기 줄이기 */
+  width: 40%;               
   min-width: 120px;
   padding: 8px 0;
   border: none;
@@ -37,7 +37,7 @@
   cursor: pointer;
   font-size: 13.5px;
 
-  /* ✅ 가운데보다 약간 오른쪽으로 */
+  
   transform: translateX(4%);
 }
 
@@ -45,7 +45,7 @@
   filter: brightness(0.95);
 }
 
-/* 하단 “이미 계정이 있으신가요?” */
+
 .signup-bottom {
   margin-top: 6px;
   width: 100%;
@@ -64,14 +64,14 @@
   text-decoration: underline;
 }
 
-/* 제목 */
+
 .signup-title {
   margin: 0 0 6px;
   font-weight: 800;
   font-size: 17px;
 }
 
-/* 라벨 (입력 제목) */
+
 .signup-label {
   display: flex;
   flex-direction: column;
@@ -81,7 +81,7 @@
   font-size: 13px;
 }
 
-/* 입력창 스타일 */
+
 .signup-input {
   width: 100%;
   padding: 8px;
@@ -96,7 +96,7 @@
   box-shadow: 0 0 0 2px rgba(149,196,156,0.2);
 }
 
-/* 필드셋, 라디오/체크박스 */
+
 .signup-fieldset {
   margin-top: 6px;
 }
@@ -116,11 +116,11 @@
   font-size: 13px;
 }
 
-/* 반응형 */
+
 @media (max-width: 768px) {
   .signup-btn {
     width: 60%;
-    transform: none; /* 모바일에서는 가운데 정렬 */
+    transform: none; 
   }
 
   .signup-bottom {

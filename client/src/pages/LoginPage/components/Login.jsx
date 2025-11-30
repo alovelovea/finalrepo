@@ -11,7 +11,7 @@ export default function Login() {
   const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ 저장된 아이디/비밀번호 불러오기
+
   useEffect(() => {
     const savedId = localStorage.getItem("remember_id");
     const savedPw = localStorage.getItem("remember_pw");
@@ -29,17 +29,17 @@ export default function Login() {
         password_2: password,
       });
 
-      // ✅ 토스트 메시지 표시
+    
       setShowToast(true);
       setError("");
 
       localStorage.setItem("user", JSON.stringify(res.data));
       
-      // 사용자 정보 저장 (clear ❌)
+   
       localStorage.setItem("user_id", res.data.user_id);
       localStorage.setItem("name", res.data.name);
 
-      // ✅ remember 체크 시 아이디+비밀번호 저장
+    
       if (remember) {
         localStorage.setItem("remember_id", userId);
         localStorage.setItem("remember_pw", password);
@@ -48,7 +48,7 @@ export default function Login() {
         localStorage.removeItem("remember_pw");
       }
 
-      // ✅ 1초 후 페이지 이동
+
       setTimeout(() => {
         setShowToast(false);
         navigate("/home");

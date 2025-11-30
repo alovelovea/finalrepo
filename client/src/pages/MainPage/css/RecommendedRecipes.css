@@ -5,14 +5,14 @@
 .recommended-recipe-card {
   display: flex;
   align-items: flex-start;
-  padding-top: 0; /* 상단 패딩을 0으로 */
+  padding-top: 0; 
   padding-bottom: 1rem;
   border-radius: 0.375rem;
 }
 .recommended-recipe-card:hover {
     background-color: #f9fafb;
 }
-/* This handles the space-x-4 behavior */
+
 .recommended-recipe-card > * + * {
     margin-left: 1rem;
 }

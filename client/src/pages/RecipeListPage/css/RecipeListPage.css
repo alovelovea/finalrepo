@@ -1,9 +1,9 @@
 .recipe-list-container {
-  padding-top: 130px; /* 네비게이션 바 피하기 */
+  padding-top: 130px; 
    padding-left: 30px;
   padding-right: 30px;
   max-width: 1600px;
-  margin: 0 auto; /* 화면 가운데 정렬 */
+  margin: 0 auto; 
 }
 
 .search-bar {
@@ -24,7 +24,7 @@
 }
 
 .search-bar input:focus {
-  border-color: #79AC78; /* 포커스 색깔 */
+  border-color: #79AC78; 
 }
 
 .search-bar .search-icon {

@@ -1,7 +1,7 @@
 import React from 'react';
 import '../css/IngredientsList.css';
 
-// 섹션 번호, 이름, 그리고 해당 섹션에 포함될 카테고리 목록을 정의합니다.
+
 const sectionConfig = {
   1: { name: '신선 식품', categories: ['신선식품'] },
   2: { name: '유제품', categories: ['유제품'] },
@@ -10,9 +10,9 @@ const sectionConfig = {
 };
 
 const IngredientsList = ({ selectedSection = null, items = [] }) => {
-  // API로 받은 items를 카테지에 따라 sectionsData 객체로 그룹화합니다.
+
   const sectionsData = items.reduce((acc, item) => {
-    let sectionNumber = null; // 기본값은 null, 매핑되지 않으면 무시
+    let sectionNumber = null; 
 
     for (const [key, value] of Object.entries(sectionConfig)) {
       if (value.categories.includes(item.category)) {
@@ -21,7 +21,7 @@ const IngredientsList = ({ selectedSection = null, items = [] }) => {
       }
     }
 
-    if (sectionNumber) { // 매핑된 카테고리만 처리
+    if (sectionNumber) { 
       if (!acc[sectionNumber]) {
         acc[sectionNumber] = [];
       }
@@ -42,7 +42,7 @@ const IngredientsList = ({ selectedSection = null, items = [] }) => {
     </ul>
   );
 
-  // 특정 섹션이 선택된 경우
+
   if (selectedSection) {
     const sectionName = sectionConfig[selectedSection]?.name || `${selectedSection}번 칸`;
     return (
@@ -55,7 +55,7 @@ const IngredientsList = ({ selectedSection = null, items = [] }) => {
     );
   }
 
-  // 선택이 없는 경우: 4개의 칸을 각각 스크롤 가능한 박스로 보여줌
+  
   return (
     <div className="sections-container">
       {Object.keys(sectionConfig).map((key) => (

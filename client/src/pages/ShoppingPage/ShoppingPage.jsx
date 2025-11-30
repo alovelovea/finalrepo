@@ -16,12 +16,10 @@ const ShoppingPage = () => {
 
   const location = useLocation();
 
-  // ⭐ RecipeDetailPage에서 전달한 부족 재료 객체 배열
+  
   const missingItems = location.state?.missingItems || [];
 
-  // -----------------------
-  // 1) 재료 API 불러오기
-  // -----------------------
+  
   useEffect(() => {
     const fetchIngredients = async () => {
       try {
@@ -45,9 +43,7 @@ const ShoppingPage = () => {
     fetchIngredients();
   }, []);
 
-  // -----------------------
-  // 2) 부족 재료 자동 장바구니 추가
-  // -----------------------
+
   const effectRan = useRef(false);
 
   useEffect(() => {
@@ -56,12 +52,12 @@ const ShoppingPage = () => {
 
     effectRan.current = true;
 
-    // 백엔드가 준 JSON 그대로 사용
+    
     missingItems.forEach((item) => {
       const prod = products.find((p) => p.id === item.ingredient_id);
       if (!prod) return;
 
-      // purchase_qty 만큼 장바구니에 추가
+      
       for (let i = 0; i < item.purchase_qty; i++) {
         addToCart(item.ingredient_id);
       }
@@ -69,18 +65,14 @@ const ShoppingPage = () => {
   }, [missingItems, products]);
 
 
-  // -----------------------
-  // 3) 검색
-  // -----------------------
+  
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return products;
     return products.filter((p) => p.name.toLowerCase().includes(q));
   }, [products, query]);
 
-  // -----------------------
-  // 4) 장바구니 기능
-  // -----------------------
+ 
   const addToCart = (productId) => {
     setCart((prev) => {
       const found = prev.find((c) => c.productId === productId);
@@ -119,9 +111,7 @@ const ShoppingPage = () => {
     0
   );
 
-  // -----------------------
-  // 5) 구매(DB 저장)
-  // -----------------------
+  
   const handleBuy = async () => {
     if (cartItems.length === 0) {
       alert('장바구니가 비어있습니다.');
@@ -147,14 +137,12 @@ const ShoppingPage = () => {
     }
   };
 
-  // -----------------------
-  // 6) UI 렌더링
-  // -----------------------
+  
   return (
     <div className="shopping-page-container">
       <div className="shopping-page-content">
 
-        {/* 검색 영역 */}
+        
         <div className="card">
           <div className="search-container">
             <input
@@ -165,12 +153,12 @@ const ShoppingPage = () => {
             />
           </div>
 
-          {/* 제품 리스트 */}
+           
           <div className="product-list">
             {filtered.map((p) => (
               <div key={p.id} className="product-item">
 
-                {/* 이미지 */}
+                
                 <div className="product-image-container">
                   <img
                     src={p.image}
@@ -179,7 +167,7 @@ const ShoppingPage = () => {
                   />
                 </div>
 
-                {/* 이름 + 단위 */}
+                
                 <div className="product-info">
                   <div className="product-name">{p.name}</div>
                   <div className="product-price">
@@ -187,7 +175,7 @@ const ShoppingPage = () => {
                   </div>
                 </div>
 
-                {/* 버튼 */}
+                
                 <button
                   onClick={() => addToCart(p.id)}
                   className="add-to-cart-btn"
@@ -200,7 +188,7 @@ const ShoppingPage = () => {
           </div>
         </div>
 
-        {/* 장바구니 */}
+        
         <div className="card">
           <h3 className="cart-title">장바구니</h3>
 
@@ -208,7 +196,7 @@ const ShoppingPage = () => {
             {cartItems.map((it) => (
               <div key={it.productId} className="cart-item">
 
-                {/* 이미지 */}
+                
                 <div className="cart-item-image-container">
                   <img
                     src={it.product.image}
@@ -217,7 +205,7 @@ const ShoppingPage = () => {
                   />
                 </div>
 
-                {/* 상품명 & 단위 */}
+                
                 <div className="cart-item-info">
                   <div className="product-name">{it.product.name}</div>
                   <div className="product-price">
@@ -225,7 +213,7 @@ const ShoppingPage = () => {
                   </div>
                 </div>
 
-                {/* 수량 조절 */}
+                
                 <div className="cart-item-controls">
                   <div className="quantity-control">
                     <button onClick={() => changeQty(it.productId, -1)} className="quantity-button">[-]</button>
@@ -233,7 +221,7 @@ const ShoppingPage = () => {
                     <button onClick={() => changeQty(it.productId, 1)} className="quantity-button">[+]</button>
                   </div>
 
-                  {/* 가격 + 총량(수량 × baseUnit) */}
+                  
                   <div className="cart-item-price-details">
                     <span>
                       {formatKRW((it.product.price || 0) * it.qty)}
@@ -245,7 +233,7 @@ const ShoppingPage = () => {
                     </span>
                   </div>
 
-                  {/* 삭제 */}
+                  
                   <button
                     onClick={() => removeFromCart(it.productId)}
                     className="remove-from-cart-btn"
@@ -263,7 +251,7 @@ const ShoppingPage = () => {
             )}
           </div>
 
-          {/* BUY */}
+          
           <div className="buy-section">
             <div className="total-price">
               총 가격: {formatKRW(totalPrice)}

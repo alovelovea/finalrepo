@@ -3,7 +3,7 @@
 export const textStyles = {
   colorGreen: 'text-green-600',
   colorRed: 'text-red-500',
-  pageTitle: 'text-2xl font-bold mb-6', // LoginPage에 맞게 스타일 조정
+  pageTitle: 'text-2xl font-bold mb-6', 
 };
 
 export const buttonStyles = {

@@ -10,11 +10,11 @@
 
 .recipe-grid {
   display: grid;
-  grid-auto-flow: column;      /* 가로로 흐르게 */
-  grid-auto-columns: 250px;    /* 카드 너비와 동일하게 */
+  grid-auto-flow: column;      
+  grid-auto-columns: 250px;    
   gap: 60px;
-  overflow-x: auto;            /* ⭐ 가로 스크롤 생성 */
-  padding-bottom: 10px;        /* 스크롤바 안 겹치게 여백 */
+  overflow-x: auto;           
+  padding-bottom: 10px;        
 }
 
 .recipe-grid::-webkit-scrollbar {

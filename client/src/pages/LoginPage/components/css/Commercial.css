@@ -34,17 +34,17 @@
 
 
 
-/* ✅ 이미지 비율 유지 + 동일 크기 */
+
 .poster-img {
-  width: 85%;          /* 부모 크기에 딱 맞게 */
+  width: 85%;          
   height: 85%;
-  object-fit: cover;    /* 이미지 비율 유지하면서 채우기 */
+  object-fit: cover;    
   object-position: center;
   transform: translateX(20px);      
   
 }
 
-/* ✅ 반응형에서 동일 비율 유지 */
+
 @media (max-width: 920px) {
   .poster {
     width: 160px;

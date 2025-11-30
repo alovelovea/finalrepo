@@ -6,9 +6,9 @@ const UploadPage = () => {
   const navigate = useNavigate();
 
   const onDrop = useCallback(acceptedFiles => {
-    // Handle file upload logic here
+    
     console.log(acceptedFiles);
-    // For now, let's navigate back to home after "upload"
+    
     navigate('/recognized-ingredients');
   }, [navigate]);
 

@@ -1,4 +1,4 @@
-// AddManualIngredientDialog.jsx
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import AddIngredientDialog from '../../AddIngredientPage/components/AddIngredientDialog';
@@ -9,7 +9,7 @@ const AddManualIngredientDialog = ({ onClose, userId }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [items, setItems] = useState([]);
 
-  // 🔥 프롭으로 안 넘어와도 localStorage 에서 보조로 가져오게 함
+ 
   const effectiveUserId = userId || localStorage.getItem('user_id');
 
   const decreaseAmount = (index) => {
@@ -64,11 +64,11 @@ const AddManualIngredientDialog = ({ onClose, userId }) => {
         })),
       };
 
-      // 🔥 새로 만든 수동 추가 전용 API
+     
       await axios.post('http://localhost:8000/api/fridge/manual-add/', payload);
 
       alert('냉장고에 추가되었습니다!');
-      onClose(); // 모달 닫기
+      onClose(); 
     } catch (err) {
       console.error(err);
       alert('저장 중 오류가 발생했습니다.');

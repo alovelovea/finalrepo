@@ -23,7 +23,7 @@ export default function Signup() {
   };
 
   const handleSignup = async () => {
-    // ✅ 필수 입력 검증
+  
     if (!name || !address || !userId || !password) {
       setError("이름, 주소, ID, PW는 모두 입력해야 합니다.");
       return;
@@ -40,7 +40,7 @@ export default function Signup() {
       });
 
       if (res.status === 201) {
-        // (선택) 필요하면 clear 제거해도 됨
+        
         localStorage.setItem("user_id", res.data.user_id);
         localStorage.setItem("name", res.data.name);
 

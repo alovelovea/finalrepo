@@ -1,4 +1,4 @@
-/* 어두운 반투명 배경 */
+
 .cancel-modal-backdrop {
   position: fixed;
   top: 0;
@@ -12,7 +12,7 @@
   z-index: 999;
 }
 
-/* 모달 박스 */
+
 .cancel-modal-box {
   background: white;
   padding: 22px 26px;
@@ -34,14 +34,14 @@
   color: #666;
 }
 
-/* 버튼 영역 */
+
 .cancel-modal-buttons {
   display: flex;
   justify-content: center;
   gap: 10px;
 }
 
-/* 회색 버튼 */
+
 .btn-gray.small {
   padding: 6px 0;
   width: 90px;
@@ -57,7 +57,7 @@
   background: #d5d5d5;
 }
 
-/* 빨간 버튼 */
+
 .btn-red.small {
   padding: 6px 0;
   width: 90px;

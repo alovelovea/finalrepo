@@ -69,7 +69,7 @@ const RecognizedIngredientsDialog = ({ initialItems = [], onClose, onConfirm, on
 
   return (
     <div className="dialog-backdrop">
-      <div className="dialog-container" style={{ maxWidth: '56rem' }}> {/* 너비 확장 */}
+      <div className="dialog-container" style={{ maxWidth: '56rem' }}> 
         <h2 className="dialog-title">인식된 재료 목록</h2>
         
         <div className="ingredient-list scroll-area">

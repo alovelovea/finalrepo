@@ -34,7 +34,7 @@ const IngredientsDialog = ({ onClose }) => {
             취소
           </button>
           <button
-            onClick={onClose} // 일단은 닫기 기능으로 통일
+            onClick={onClose} 
             className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
           >
             추가

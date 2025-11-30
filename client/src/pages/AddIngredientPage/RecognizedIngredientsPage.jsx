@@ -1,16 +1,16 @@
-// src/pages/AddIngredientPage/RecognizedIngredientsPage.jsx
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import AddIngredientDialog from './components/AddIngredientDialog';
 import './css/RecognizedIngredientsPage.css';
 
-// 문자열 → 숫자 / 단위 분리
+
 const parseAmount = (amount) => {
   if (!amount) return { quantity: 1, unit: '' };
 
   const text = String(amount).trim();
-  const match = text.match(/(\d+(?:\.\d+)?)(.*)/); // 숫자 + 나머지
+  const match = text.match(/(\d+(?:\.\d+)?)(.*)/); 
 
   if (!match) {
     return { quantity: 1, unit: text };
@@ -79,14 +79,14 @@ const RecognizedIngredientsPage = () => {
     setIsDialogOpen(false);
   };
 
-  // 🔥 인식된 재료들을 냉장고(Fridge) DB에 저장
+  
   const handleSaveToFridge = async () => {
     if (items.length === 0) {
       alert('저장할 재료가 없습니다.');
       return;
     }
 
-    // 로그인한 user_id 가져오기
+   
     let userId = localStorage.getItem('user_id');
     if (!userId) {
       try {
@@ -95,8 +95,8 @@ const RecognizedIngredientsPage = () => {
           const parsed = JSON.parse(userStr);
           userId = parsed.user_id || parsed.userId || null;
         }
-      } catch (e) {
-        /* ignore */
+      } catch (e) { 
+       
       }
     }
 
@@ -114,11 +114,11 @@ const RecognizedIngredientsPage = () => {
     };
 
     try {
-      // manual-add 새 API 사용 (앞에서 만들었던 것)
+      
       await axios.post('http://localhost:8000/api/fridge/manual-add/', payload);
       alert('냉장고에 저장되었습니다!');
 
-      // 저장 후 재료 관리 페이지로 이동
+      
       navigate('/home');
     } catch (err) {
       console.error(err);
@@ -131,7 +131,7 @@ const RecognizedIngredientsPage = () => {
       <div className="recognized-container">
         <h2 className="recognized-title">인식된 재료 목록</h2>
 
-        {/* 스크롤 추가 */}
+        
         <div className="ingredient-list scroll-area">
           {items.map((item, idx) => (
             <div key={idx} className="ingredient-card">
@@ -224,7 +224,7 @@ const RecognizedIngredientsPage = () => {
             </div>
           ))}
 
-          {/* 수동 추가 카드 */}
+         
           <button
             type="button"
             onClick={() => setIsDialogOpen(true)}
@@ -245,7 +245,7 @@ const RecognizedIngredientsPage = () => {
             재료 다시 인식
           </button>
 
-          {/* 🔥 여기서 실제 저장 + 이동 */}
+         
           <button
             className="recognized-btn recognized-btn--green"
             onClick={handleSaveToFridge}

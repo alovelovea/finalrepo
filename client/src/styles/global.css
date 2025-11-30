@@ -1,10 +1,10 @@
-/* src/styles/global.css */
+
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 🎨 1️⃣ 전역 색상 토큰 (tailwind.config.js → var(--color-...)) */
+
 :root {
   --color-primary: #79ac78;
   --color-primary-hover: #6ba56a;
@@ -22,7 +22,7 @@
   --color-surface: #fdfbf2;
 }
 
-/* 🎨 2️⃣ 기본 폰트 (tailwind.config.js → fontFamily 부분) */
+
 html, body {
   font-family: 'Pretendard', 'ui-sans-serif', 'system-ui';
   background-color: #fff;
@@ -31,7 +31,7 @@ html, body {
   padding: 0;
 }
 
-/* 🎨 3️⃣ 추가 폰트 패밀리 (필요할 때만 사용) */
+
 .font-title {
   font-family: 'SUIT', 'Pretendard', 'sans-serif';
 }
@@ -40,7 +40,7 @@ html, body {
   font-family: 'Inter', 'system-ui', 'sans-serif';
 }
 
-/* 🎯 4️⃣ 공통 스타일 (Reset + Base) */
+
 @layer base {
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;

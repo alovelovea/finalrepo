@@ -1,11 +1,11 @@
-// src/pages/AddIngredientPage/components/AddIngredientDialog.jsx
+
 import React, { useState, useEffect } from 'react';
 import './AddIngredientDialog.css';
 
 const AddIngredientDialog = ({ onClose, onConfirm }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [ingredients, setIngredients] = useState([]);
-  const [selected, setSelected] = useState([]); // 선택된 재료들
+  const [selected, setSelected] = useState([]);
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/ingredients/list/')
@@ -42,7 +42,7 @@ const AddIngredientDialog = ({ onClose, onConfirm }) => {
 
         <h2 className="dialog-title">재료 추가</h2>
 
-        {/* 검색 바 */}
+      
         <input
           type="text"
           placeholder="재료 검색..."
@@ -51,7 +51,7 @@ const AddIngredientDialog = ({ onClose, onConfirm }) => {
           className="dialog-search"
         />
 
-        {/* 체크박스 리스트 */}
+      
         <div className="dialog-list">
           {filteredIngredients.map((item) => (
             <label
@@ -74,7 +74,7 @@ const AddIngredientDialog = ({ onClose, onConfirm }) => {
           ))}
         </div>
 
-        {/* 하단 버튼 */}
+        
         <div className="dialog-actions">
           <button
             onClick={onClose}

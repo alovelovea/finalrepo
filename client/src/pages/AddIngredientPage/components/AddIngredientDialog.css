@@ -1,4 +1,4 @@
-/* 배경 오버레이 */
+
 .dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -9,34 +9,33 @@
   z-index: 50;
 }
 
-/* 모달 박스 */
 .dialog-container {
   position: relative;
   width: 100%;
-  max-width: 480px; /* max-w-md */
+  max-width: 480px; 
   background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 0.75rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* 닫기 버튼 */
+
 .dialog-close {
   position: absolute;
   top: 0.75rem;
   right: 1rem;
   font-size: 1.5rem;
-  color: #6b7280; /* gray-500 */
+  color: #6b7280;
   background: none;
   border: none;
   cursor: pointer;
 }
 
 .dialog-close:hover {
-  color: #111827; /* gray-900 */
+  color: #111827; 
 }
 
-/* 제목 */
+
 .dialog-title {
   font-size: 1.25rem;
   font-weight: 700;
@@ -44,7 +43,7 @@
   margin-bottom: 1rem;
 }
 
-/* 검색 인풋 */
+
 .dialog-search {
   width: 100%;
   border: 1px solid #d1d5db;
@@ -54,9 +53,9 @@
   font-size: 0.9rem;
 }
 
-/* 리스트 영역 */
+
 .dialog-list {
-  max-height: 15rem; /* 대략 240px (max-h-60) */
+  max-height: 15rem;
   overflow-y: auto;
   padding-right: 0.5rem;
   display: flex;
@@ -64,7 +63,7 @@
   gap: 0.5rem;
 }
 
-/* 각 아이템 */
+
 .dialog-item {
   display: flex;
   align-items: center;
@@ -76,39 +75,39 @@
 }
 
 .dialog-item:hover {
-  background-color: #f9fafb; /* gray-50 */
+  background-color: #f9fafb; 
 }
 
-/* 체크박스 */
+
 .dialog-checkbox {
   width: 1rem;
   height: 1rem;
 }
 
-/* 텍스트 영역 */
+
 .dialog-item-text {
   display: flex;
   flex-direction: column;
 }
 
 .dialog-item-name {
-  color: #1f2937; /* gray-800 */
+  color: #1f2937; 
   font-size: 0.9rem;
 }
 
 .dialog-item-unit {
-  color: #6b7280; /* gray-500 */
+  color: #6b7280; 
   font-size: 0.8rem;
 }
 
-/* 하단 버튼 영역 */
+
 .dialog-actions {
   margin-top: 1.5rem;
   display: flex;
   justify-content: space-between;
 }
 
-/* 버튼 공통 */
+
 .dialog-btn {
   width: 8rem;
   padding: 0.5rem 0;
@@ -118,7 +117,7 @@
   cursor: pointer;
 }
 
-/* 취소 버튼 */
+
 .dialog-btn--gray {
   background-color: #e5e7eb;
 }
@@ -127,7 +126,7 @@
   background-color: #d1d5db;
 }
 
-/* 확인 버튼 */
+
 .dialog-btn--blue {
   background-color: #3b82f6;
   color: #ffffff;

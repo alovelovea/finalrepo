@@ -19,7 +19,7 @@
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-/* Search Area */
+
 .search-container {
     display: flex;
     justify-content: center;
@@ -39,7 +39,7 @@
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-/* Product List */
+
 .product-list {
     margin-top: 1rem;
     display: grid;
@@ -104,7 +104,7 @@
     background-color: #16a34a;
 }
 
-/* Cart */
+
 .cart-title {
     font-weight: 600;
     margin-bottom: 0.75rem;
@@ -187,7 +187,7 @@
     border-radius: 0.25rem;
 }
 
-/* Buy Section */
+
 .buy-section {
     margin-top: 1rem;
     display: flex;

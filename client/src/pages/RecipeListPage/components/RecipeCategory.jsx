@@ -14,7 +14,7 @@ const RecipeCategory = ({ title, items, onFavoriteToggle, onCardClick }) => {
               key={item.id}
               data={item}
               onFavoriteToggle={onFavoriteToggle}
-              onClick={onCardClick}   // 🔥 카드 클릭 시 이동 기능 전달
+              onClick={onCardClick}   
             />
           ))
         ) : (

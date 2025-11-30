@@ -8,14 +8,14 @@ function RecipeDetailPage() {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ⭐ 구조화된 부족 재료 배열
+
   const [missingIngredients, setMissingIngredients] = useState([]);
   const [showMissingModal, setShowMissingModal] = useState(false);
   const [userAllergies, setUserAllergies] = useState([]);
   const [allergyMap, setAllergyMap] = useState({});
 
   useEffect(() => {
-    // 유저 알러지 정보 불러오기
+    
     const userData = localStorage.getItem("user");
     if (userData) {
       const parsedUser = JSON.parse(userData);
@@ -24,7 +24,7 @@ function RecipeDetailPage() {
       }
     }
 
-    // 알러지-재료 맵 불러오기
+ 
     fetch('http://localhost:8000/api/allergies/map/')
       .then(res => {
         if (!res.ok) {
@@ -46,14 +46,14 @@ function RecipeDetailPage() {
     return `/FOOD/${fileName}`;
   };
 
-  // ⭐ 쇼핑 페이지로 이동 (DB 저장 X)
+
   const handleGoShopping = () => {
     navigate("/shopping", {
       state: { missingItems: missingIngredients }
     });
   };
 
-  // ⭐ 요리 실행
+ 
   const handleSelect = () => {
     const user_id = localStorage.getItem("user_id");
 
@@ -66,7 +66,7 @@ function RecipeDetailPage() {
       .then(data => {
 
         if (data.status === "insufficient") {
-          // 🔥 이제 data.shortage는 구조화된 객체 배열
+          
           setMissingIngredients(data.shortage);
           setShowMissingModal(true);
           return;
@@ -130,7 +130,7 @@ function RecipeDetailPage() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       
-      {/* ⭐ 부족 재료 모달 */}
+      
       {showMissingModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[999]">
           <div className="bg-white p-6 rounded-lg w-80 shadow-lg">
@@ -165,7 +165,7 @@ function RecipeDetailPage() {
         </div>
       )}
 
-      {/* 기존 페이지 UI */}
+     
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">{recipe.name}</h2>
@@ -174,24 +174,24 @@ function RecipeDetailPage() {
 
         <div className="p-6 flex flex-col gap-6 flex-1 overflow-auto">
 
-          {/* Row 1: Picture and Ingredients */}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Column 1.1: Picture */}
+           
             <div className="w-full h-64 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
               <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
             </div>
-            {/* Column 1.2: Ingredients */}
+            
             <div>
               <h3 className="font-semibold mb-2">[재료]</h3>
               <ul className="list-disc pl-5 space-y-2 text-gray-700 max-h-56 overflow-y-auto">
                 {recipe.ingredients_list.map((item, idx) => {
-                  // 알러지 맵을 사용하여 알러지 여부 확인
+                  
                   const isAllergic = userAllergies.some(userAllergyCategory => {
                     const ingredientsInAllergyCategory = allergyMap[userAllergyCategory];
                     if (!ingredientsInAllergyCategory) {
                       return false;
                     }
-                    // 해당 알러지 카테고리에 속하는 재료 중 하나라도 레시피 아이템 문자열에 포함되는지 확인
+                    
                     return ingredientsInAllergyCategory.some(allergicIngredient => 
                       item.includes(allergicIngredient)
                     );
@@ -210,7 +210,7 @@ function RecipeDetailPage() {
             </div>
           </div>
 
-          {/* Row 2: Cooking Instructions */}
+          
           <div>
             <h3 className="font-semibold mb-2">[조리 설명]</h3>
             <div className="max-h-72 overflow-y-auto text-sm text-gray-700 whitespace-pre-line">

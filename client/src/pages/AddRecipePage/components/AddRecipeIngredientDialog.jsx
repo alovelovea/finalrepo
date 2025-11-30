@@ -3,19 +3,19 @@ import "../css/AddIngredientDialog.css";
 
 export default function AddRecipeIngredientDialog({
   ingredients,
-  selectedDefault = [],   // ⭐ 추가된 부분
+  selectedDefault = [],   
   onConfirm,
   onClose,
 }) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
 
-  // ⭐ 모달 열릴 때 기존 선택한 재료 복원
+  
   useEffect(() => {
     setSelected(selectedDefault);
   }, [selectedDefault]);
 
-  // 선택/해제 + 최초 선택 시 quantity 기본값 1
+ 
   const toggleSelect = (ing) => {
     setSelected((prev) => {
       const exists = prev.find((i) => i.ingredient_id === ing.ingredient_id);
@@ -38,7 +38,7 @@ export default function AddRecipeIngredientDialog({
     });
   };
 
-  // 개별 수량 감소
+
   const decreaseAmount = (id) => {
     setSelected((prev) =>
       prev.map((item) =>
@@ -49,7 +49,7 @@ export default function AddRecipeIngredientDialog({
     );
   };
 
-  // 개별 수량 증가
+ 
   const increaseAmount = (id) => {
     setSelected((prev) =>
       prev.map((item) =>
@@ -60,7 +60,7 @@ export default function AddRecipeIngredientDialog({
     );
   };
 
-  // 직접 입력 모드 변경
+  
   const toggleEditMode = (id, value) => {
     setSelected((prev) =>
       prev.map((item) =>
@@ -85,7 +85,7 @@ export default function AddRecipeIngredientDialog({
 
         <h2 className="dialog-title">재료 선택</h2>
 
-        {/* 검색 */}
+        
         <input
           className="dialog-search"
           type="text"

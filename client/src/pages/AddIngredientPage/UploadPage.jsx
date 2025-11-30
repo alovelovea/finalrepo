@@ -1,4 +1,4 @@
-// src/pages/AddIngredientPage/UploadPage.jsx
+
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
@@ -6,8 +6,7 @@ import './css/UploadPage.css';
 import loadingGif from './assets/loading.gif';  
 const UploadPage = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);   // 🌟 로딩 상태 추가
-
+  const [loading, setLoading] = useState(false);  
   const onDrop = useCallback(
     async (acceptedFiles) => {
       if (!acceptedFiles || acceptedFiles.length === 0) return;
@@ -16,7 +15,7 @@ const UploadPage = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      setLoading(true);     // 🌟 LLM 호출 시작 → 로딩 시작
+      setLoading(true);     
 
       try {
         const res = await fetch('http://127.0.0.1:8000/classify/', {
@@ -52,7 +51,7 @@ const UploadPage = () => {
         console.error('fetch 자체 에러:', err);
         alert('이미지 분석 중 네트워크 오류가 발생했습니다.');
       } finally {
-        setLoading(false);   // 🌟 LLM 호출 종료 → 로딩 종료
+        setLoading(false);  
       }
     },
     [navigate]
@@ -69,7 +68,7 @@ const UploadPage = () => {
   return (
     <div className="upload-page">
 
-      {/* 🌟 로딩 상태일 때 스피너 오버레이 */}
+      
       {loading && (
         <div className="loading-overlay">
           <img
@@ -102,7 +101,7 @@ const UploadPage = () => {
           <button
             onClick={open}
             className="upload-btn upload-btn--green"
-            disabled={loading}   // 🌟 로딩 중 버튼 비활성화
+            disabled={loading}  
           >
             파일 선택
           </button>

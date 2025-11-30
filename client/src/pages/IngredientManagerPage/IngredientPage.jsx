@@ -8,7 +8,7 @@ import './css/IngredientPage.css';
 
 const categories = ['전체', '신선식품', '유제품', '냉동', '냉동식품', '유통기한 임박'];
 
-// 🔥 localStorage 에서 로그인한 user_id 가져오기
+
 const getCurrentUserId = () => {
   try {
     const userStr = localStorage.getItem('user');
@@ -18,9 +18,9 @@ const getCurrentUserId = () => {
       if (parsed.userId) return parsed.userId;
     }
   } catch (e) {
-    // JSON 파싱 실패해도 무시
+  
   }
-  // 백업: 별도로 저장된 user_id 키가 있으면 사용
+  
   return localStorage.getItem('user_id') || null;
 };
 
@@ -29,12 +29,12 @@ const IngredientPage = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('전체');
 
-  // Dialog visibility states
+  
   const [isAddManualDialogVisible, setIsAddManualDialogVisible] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [isRecognizedDialogVisible, setIsRecognizedDialogVisible] = useState(false);
   
-  // State for recognized items from image upload
+  
   const [recognizedItems, setRecognizedItems] = useState([]);
 
   const currentUserId = getCurrentUserId();
@@ -47,9 +47,7 @@ const fetchFridgeItems = async () => {
   try {
     const response = await axios.get(`http://localhost:8000/fridge_items/?user_id=${currentUserId}`);
 
-    // ------------------------------
-    // ① 상대방 코드 그대로: itemsWithExpiryDays 생성
-    // ------------------------------
+    
     const itemsWithExpiryDays = response.data.items
       .filter(item => item.fridge_id != null)
       .map((item, index) => {
@@ -72,9 +70,7 @@ const fetchFridgeItems = async () => {
         };
       });
 
-    // ------------------------------
-    // ② 너의 통합 로직 그대로 적용
-    // ------------------------------
+   
     const grouped = {};
 
     itemsWithExpiryDays.forEach(item => {
@@ -87,19 +83,19 @@ const fetchFridgeItems = async () => {
           backendIds: [item.backendId],
         };
       } else {
-        grouped[key].amount += item.amount; // 수량 합산
+        grouped[key].amount += item.amount; 
         grouped[key].expiryList.push(item.expiryDays);
         grouped[key].backendIds.push(item.backendId);
       }
     });
 
-    // 가장 임박한 expiryDays 선택
+    
     const finalList = Object.values(grouped).map(item => ({
       ...item,
       expiryDays: Math.min(...item.expiryList),
     }));
 
-    // 최종 반영
+    
     setIngredients(finalList);
 
   } catch (error) {
@@ -111,7 +107,7 @@ const fetchFridgeItems = async () => {
     fetchFridgeItems();
   }, [currentUserId]);
 
-  // ✅ 새 재료(직접추가/이미지 인식) → FridgeDB 저장
+  
   const handleAddConfirm = async (itemsToAdd) => {
     try {
       if (!currentUserId) {
@@ -134,7 +130,7 @@ const fetchFridgeItems = async () => {
       await axios.post('http://localhost:8000/api/fridge/save/', payload);
       await fetchFridgeItems();
 
-      // 모든 다이얼로그 닫기
+   
       setIsAddManualDialogVisible(false);
       setIsRecognizedDialogVisible(false);
       alert("재료가 냉장고에 추가되었습니다.");
@@ -189,7 +185,7 @@ const fetchFridgeItems = async () => {
         quantity: newAmount 
       });
       
-      // 상태를 업데이트할 때도 고유 ID(id)를 사용하고, 서버로부터 받은 값으로 amount를 갱신합니다.
+      
       setIngredients((prev) =>
         prev.map((it) =>
           it.id === id ? { ...it, amount: response.data.quantity } : it
@@ -213,7 +209,7 @@ const fetchFridgeItems = async () => {
         const backendId = itemToDelete.backendId;
         await axios.delete(`http://localhost:8000/api/delete_ingredient/${backendId}/`);
         
-        // 상태에서 삭제할 때도 고유 ID(id)를 사용합니다.
+       
         setIngredients((prev) => prev.filter((it) => it.id !== id));
       } catch (error) {
         console.error("재료 삭제에 실패했습니다.", error);

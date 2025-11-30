@@ -3,7 +3,7 @@ import "../css/ShoppingHistoryModal.css";
 
 export default function ShoppingHistoryModal({ onClose, items }) {
   
-  // ⭐ 날짜별 그룹화
+  
   const grouped = useMemo(() => {
     const map = {};
 
@@ -13,7 +13,7 @@ export default function ShoppingHistoryModal({ onClose, items }) {
       map[date].push(item);
     });
 
-    // 날짜 내림차순 정렬
+    
     return Object.entries(map).sort((a, b) => (a[0] < b[0] ? 1 : -1));
   }, [items]);
 
@@ -30,10 +30,10 @@ export default function ShoppingHistoryModal({ onClose, items }) {
             grouped.map(([date, list], idx) => (
               <div key={idx} className="date-group">
                 
-                {/* 🔥 날짜 블록 */}
+                
                 <div className="date-header">{date}</div>
 
-                {/* 🔥 해당 날짜에 구매한 모든 아이템 */}
+                
                 {list.map((item, i) => (
                   <div key={i} className="shopping-item">
 

@@ -4,9 +4,7 @@
   padding: 100px 20px 0;
 }
 
-/* ------------------------------------------
-   TAG BOX 영역
-------------------------------------------- */
+
 .profile-tags-box {
   background: #fff;
   padding: 20px;
@@ -21,7 +19,7 @@
   gap: 10px;
 }
 
-/* 태그 pill */
+
 .profile-tag {
   background-color: #f2f2f2;
   padding: 8px 14px;
@@ -30,9 +28,7 @@
   color: #555;
 }
 
-/* ------------------------------------------
-   BUTTON 영역
-------------------------------------------- */
+
 .profile-buttons {
   display: flex;
   gap: 10px;

@@ -10,16 +10,16 @@ const RecipeListPage = () => {
 
   const userId = localStorage.getItem("user_id");
 
-  // ⭐ 이미지 경로 자동 구분함수
+  
   const getImageURL = (fileName) => {
     if (!fileName) return "/FOOD/default.png";
 
-    // 업로드 이미지 (/media/... 형태)
+    
     if (fileName.startsWith("/media/")) {
       return `http://localhost:8000${fileName}`;
     }
 
-    // 파일명만 있으면 정적 이미지
+    
     return `/FOOD/${fileName}`;
   };
 

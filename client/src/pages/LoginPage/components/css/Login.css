@@ -62,7 +62,7 @@
   animation: fadeInOut 2s ease forwards;
 }
 
-/* 부드럽게 나타났다 사라지는 효과 */
+
 @keyframes fadeInOut {
   0% { opacity: 0; transform: translateY(10px); }
   15% { opacity: 1; transform: translateY(0); }

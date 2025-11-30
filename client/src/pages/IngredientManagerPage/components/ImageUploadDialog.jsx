@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import '../../AddIngredientPage/components/AddIngredientDialog.css'; // 스타일 재사용
-import '../../AddIngredientPage/css/UploadPage.css'; // 업로드 페이지 관련 스타일
+import '../../AddIngredientPage/components/AddIngredientDialog.css'; 
+import '../../AddIngredientPage/css/UploadPage.css'; 
 import loadingGif from '../../AddIngredientPage/assets/loading.gif';
 
 const ImageUploadDialog = ({ onCancel, onSuccess }) => {
@@ -31,14 +31,14 @@ const ImageUploadDialog = ({ onCancel, onSuccess }) => {
         const data = JSON.parse(text);
         const items = Array.isArray(data.items) ? data.items : [];
         
-        onSuccess(items); // 성공 시 인식된 아이템들을 부모로 전달
+        onSuccess(items); 
 
       } catch (err) {
         console.error('이미지 분석 중 오류 발생:', err);
         alert('이미지 분석 중 오류가 발생했습니다.');
-        setLoading(false); // 오류 발생 시 로딩 상태 해제
+        setLoading(false); 
       }
-      // finally 블록은 성공/실패 모두 실행되므로 onSuccess 호출 후 다이얼로그가 바로 닫히는 것을 방지하기 위해 로직 이동
+      
     },
     [onSuccess]
   );

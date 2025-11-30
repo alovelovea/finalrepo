@@ -72,10 +72,10 @@ export default function AddRecipeForm() {
     <div className="arf-container">
       <h2 className="arf-title">레시피 추가</h2>
 
-      {/* Form Grid */}
+     
       <div className="arf-grid">
 
-        {/* 이름 */}
+      
         <label className="arf-label">이름</label>
         <input
           className="arf-input"
@@ -84,7 +84,7 @@ export default function AddRecipeForm() {
           onChange={(e) => setMenuName(e.target.value)}
         />
 
-        {/* 카테고리 */}
+      
         <label className="arf-label">카테고리</label>
         <select
           className="arf-input"
@@ -97,13 +97,13 @@ export default function AddRecipeForm() {
           <option value="중식">중식</option>
         </select>
 
-        {/* 이미지 */}
+       
         <label className="arf-label">사진</label>
         <div className="arf-upload-wrapper">
           <ImageUploadBox file={imageFile} setFile={setImageFile} />
         </div>
 
-        {/* 재료 */}
+        
         <label className="arf-label">재료</label>
         <div>
           <button
@@ -123,7 +123,7 @@ export default function AddRecipeForm() {
           />
         </div>
 
-        {/* 요리법 */}
+    
         <label className="arf-label">요리법</label>
         <textarea
           className="arf-textarea"
@@ -134,14 +134,14 @@ export default function AddRecipeForm() {
 
       </div>
 
-      {/* 버튼 구역 */}
+
       <div className="arf-btn-row">
         <button className="arf-btn-cancel" 
         onClick={() => setShowCancelModal(true)}> 취소 </button>
         <button className="arf-btn-submit" onClick={handleSubmit}>레시피 저장</button>
       </div>
 
-      {/* 모달 */}
+      
       {isDialogOpen && (
         <AddRecipeIngredientDialog
           ingredients={dbIngredients}

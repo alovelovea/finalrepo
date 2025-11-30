@@ -19,8 +19,8 @@ export default function ProfileEdit() {
 
     setUser({
       ...parsed,
-      isVegan: parsed.is_vegan,   // Django → React 변환
-      user_id: parsed.user_id,   // ★ DB 실제 user_id
+      isVegan: parsed.is_vegan,   
+      user_id: parsed.user_id,   
     });
   }, []);
 
@@ -43,7 +43,7 @@ export default function ProfileEdit() {
   const handleSubmit = async () => {
     try {
       const res = await axios.put("http://127.0.0.1:8000/api/profile/update/", {
-        user_id: user.user_id,          // ★ 진짜 key
+        user_id: user.user_id,          
         name: user.name,
         address: user.address,
         is_vegan: user.isVegan,
@@ -87,7 +87,7 @@ export default function ProfileEdit() {
         />
 
         <label>ID</label>
-        {/* ★ user.user_id 가 맞는 값 */}
+        
         <input type="text" value={user.user_id} disabled />
 
         <label>비건 여부</label>
